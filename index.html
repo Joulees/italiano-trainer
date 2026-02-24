@@ -10,6 +10,7 @@
 <title>Italiano – Vokabeltrainer</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600;700&display=swap');
+
 :root {
   --green:#27ae60; --red:#c0392b; --blue:#2471a3; --orange:#ca6f1e;
   --gold:#d4ac0d; --purple:#7d3c98;
@@ -125,7 +126,7 @@ body{font-family:'Inter',sans-serif;background:var(--dark);color:var(--text);min
 .vcard .flip-hint{font-size:.7rem;color:var(--sub);margin-top:12px;
   animation:pulse2 2s ease infinite}
 @keyframes pulse2{0%,100%{opacity:.5}50%{opacity:1}}
-.vcard .translation{font-family:'Playfair Display',serif;font-size:1.4rem; 
+.vcard .translation{font-family:'Playfair Display',serif;font-size:1.4rem;
   font-weight:700;color:var(--green);margin-top:10px;display:none}
 .vcard .translation.show{display:block}
 .vcard .trans-info{font-size:.75rem;color:var(--orange);font-style:italic;display:none}
@@ -908,14 +909,24 @@ let modalTopic=null, modalDiff=0;
 const LEVEL_NAMES=['Basis','Erweitert','Fortgeschritten'];
 const LEVEL_ICONS=['🌱','🌿','🏆'];
 
+function topicProgress(cat){
+  const unlocked=unlockedDiff(cat);
+  const words=S.words.filter(w=>w.cat===cat&&w.diff<=unlocked);
+  if(!words.length) return {pct:0,seen:0,total:0,mastered:false};
+  // Score: jede Bewertung zählt anteilig
+  // Level 0 = 0%, Level 1 = 20%, Level 2 = 40%, Level 3 = 60%, Level 4 = 80%, Level 5 = 100%
+  const score = words.reduce((sum,w)=>sum+((w.level||0)/5)*100,0);
+  const pct = Math.round(score/words.length);
+  const seen = words.filter(w=>(w.reps||0)>0).length;
+  const mastered = pct>=75&&unlocked>=2;
+  return {pct,seen,total:words.length,mastered,unlocked};
+}
+
 function renderTopics(){
   document.getElementById('topicGrid').innerHTML=TOPICS.map(t=>{
-    const all=S.words.filter(w=>w.cat===t.id);
-    const unlocked=unlockedDiff(t.id);
-    const activeWords=S.words.filter(w=>w.cat===t.id&&w.diff<=unlocked);
-    const learned=activeWords.filter(w=>(w.level||0)>=3).length;
-    const pct=activeWords.length?Math.round(learned/activeWords.length*100):0;
-    const mastered=pct>=75&&activeWords.length>0&&unlocked>=2;
+    const {pct,seen,total,mastered,unlocked}=topicProgress(t.id);
+    // Color the bar based on progress
+    const barColor = pct>=75?'#27ae60':pct>=40?'#2471a3':pct>=10?'#e67e22':'#555';
     return `<div class="topic-card${mastered?' mastered':''}" style="background:var(--card)" onclick="openTopicModal('${t.id}')">
       ${mastered?'<div class="mastered-badge">✅ Gemeistert</div>':''}
       <img class="topic-img" src="${t.img}" alt="${t.name}" onerror="this.style.display='none'">
@@ -923,8 +934,11 @@ function renderTopics(){
       <div class="topic-body" style="background:${t.color}22">
         <div class="topic-icon">${t.icon}</div>
         <div class="topic-name">${t.name}</div>
-        <div class="topic-meta">${activeWords.length} Wörter · ${LEVEL_ICONS[unlocked]} Lv${unlocked+1}</div>
-        <div class="topic-bar"><div style="width:${pct}%;background:${t.color}"></div></div>
+        <div class="topic-meta">${seen}/${total} gesehen · ${LEVEL_ICONS[unlocked]} Lv${unlocked+1}</div>
+        <div style="display:flex;align-items:center;gap:5px;margin-top:8px">
+          <div class="topic-bar" style="flex:1;margin:0"><div style="width:${pct}%;background:${barColor}"></div></div>
+          <span style="font-size:.65rem;color:rgba(255,255,255,.7);font-weight:700;min-width:28px;text-align:right">${pct}%</span>
+        </div>
       </div>
     </div>`;
   }).join('');
@@ -1022,25 +1036,56 @@ function showCardAt(i){
   const w=sessionPool[i];curWord=w;
   if(!w){
     // Check unlock after session
+    let unlockedNew=false;
     if(S.sessionCat){
-      const unlocked=checkAndUnlock(S.sessionCat);
-      if(unlocked){
+      unlockedNew=checkAndUnlock(S.sessionCat);
+      if(unlockedNew){
         const newLv=unlockedDiff(S.sessionCat);
         const t=TOPICS.find(x=>x.id===S.sessionCat);
         document.getElementById('unlockMsg').textContent=
           `${t?.name}: ${LEVEL_ICONS[newLv]} ${LEVEL_NAMES[newLv]} ist jetzt verfügbar!`;
         document.getElementById('unlockBanner').classList.remove('hidden');
-        setTimeout(()=>document.getElementById('unlockBanner').classList.add('hidden'),5000);
+        setTimeout(()=>document.getElementById('unlockBanner').classList.add('hidden'),6000);
       }
     }
-    document.getElementById('cardWord').textContent='🎉 Sitzung abgeschlossen!';
-    document.getElementById('cardInfo').textContent='';
-    document.getElementById('cardHint').textContent='';
-    document.getElementById('cardTrans').classList.remove('show');
-    document.getElementById('cardTransInfo').classList.remove('show');
-    document.getElementById('cardEx').classList.remove('show');
+    const {pct,seen,total}=S.sessionCat?topicProgress(S.sessionCat):{pct:0,seen:0,total:0};
+    const sessionCorrect=sessionPool.filter(w=>(w.reps||0)>0).length;
+    // Show end screen with back button
+    document.getElementById('vocabCard').innerHTML=`
+      <div style="text-align:center;padding:20px">
+        <div style="font-size:2.5rem;margin-bottom:10px">${unlockedNew?'🔓':'🎉'}</div>
+        <div style="font-family:Playfair Display,serif;font-size:1.4rem;font-weight:700;margin-bottom:8px">
+          ${unlockedNew?'Neues Level freigeschaltet!':'Sitzung abgeschlossen!'}
+        </div>
+        ${S.sessionCat?`
+        <div style="background:#1e1e35;border-radius:12px;padding:12px;margin-bottom:16px;border:1px solid #2a2a45">
+          <div style="font-size:.75rem;color:#8888aa;margin-bottom:8px;letter-spacing:.3px">DEIN FORTSCHRITT</div>
+          <div style="height:10px;background:#0d0d1a;border-radius:5px;overflow:hidden;margin-bottom:8px">
+            <div style="width:${pct}%;height:100%;background:linear-gradient(90deg,#2471a3,#27ae60);border-radius:5px;transition:width .6s"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:.78rem">
+            <span style="color:#8888aa">${seen} / ${total} Wörter gesehen</span>
+            <span style="color:#27ae60;font-weight:700">${pct}%</span>
+          </div>
+          ${pct>=75&&unlockedDiff(S.sessionCat)<2?'<div style="font-size:.72rem;color:#d4ac0d;margin-top:6px">🏆 75% erreicht – nächstes Level freigeschaltet!</div>':
+            pct<75?`<div style="font-size:.72rem;color:#8888aa;margin-top:6px">Noch ${75-pct}% bis zum nächsten Level</div>`:''}
+        </div>`:''}
+        <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+          <button onclick="showView('topics')"
+            style="background:linear-gradient(135deg,#1a5276,#2471a3);color:#fff;border:none;
+            border-radius:12px;padding:11px 18px;font-weight:700;cursor:pointer;font-size:.85rem">
+            🗂 Zu den Themen
+          </button>
+          <button onclick="resetSession()"
+            style="background:linear-gradient(135deg,#1e8449,#27ae60);color:#fff;border:none;
+            border-radius:12px;padding:11px 18px;font-weight:700;cursor:pointer;font-size:.85rem">
+            🔄 Nochmal
+          </button>
+        </div>
+      </div>`;
     document.getElementById('ratingArea').classList.add('hidden');
     document.getElementById('learnProg').style.width='100%';
+    document.getElementById('sessionInfo').textContent='✅ Sitzung beendet';
     renderTopics();return;
   }
   const dir=document.getElementById('dirSelect').value;
@@ -1358,10 +1403,11 @@ document.getElementById('streakBadge').textContent='🔥 '+S.streak+' Tage';
 addXP(0);
 showView('topics');
 </script>
+<!-- PWA Service Worker -->
 <script>
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js')
-      .then(() => console.log('✅ Service Worker registriert'))
+      .then(() => console.log('✅ SW aktiv'))
       .catch(e => console.log('❌ SW Fehler:', e));
   }
 </script>
