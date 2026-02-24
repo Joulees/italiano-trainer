@@ -1,0 +1,1369 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<link rel="manifest" href="/manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<meta name="theme-color" content="#0d0d1a">
+<title>Italiano – Vokabeltrainer</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;500;600;700&display=swap');
+:root {
+  --green:#27ae60; --red:#c0392b; --blue:#2471a3; --orange:#ca6f1e;
+  --gold:#d4ac0d; --purple:#7d3c98;
+  --dark:#0d0d1a; --card:#161626; --accent:#1e1e35; --text:#f0f0f5;
+  --sub:#8888aa; --border:#2a2a45; --radius:18px;
+  --cream:#f5f0e8; --italian-red:#ce2b37; --italian-green:#009246;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--dark);color:var(--text);min-height:100vh;overflow-x:hidden}
+
+/* ── HEADER ── */
+.app-header{
+  background:linear-gradient(135deg,#0d0d1a 0%,#1a0a2e 50%,#0d1a0d 100%);
+  border-bottom:1px solid var(--border);
+  padding:0;position:sticky;top:0;z-index:50;
+  box-shadow:0 4px 30px rgba(0,0,0,.5)
+}
+.header-hero{
+  position:relative;height:180px;overflow:hidden;
+  background:linear-gradient(135deg,#0d1a3a 0%,#1a0d2e 40%,#1a1a0d 100%)
+}
+.header-hero img{width:100%;height:100%;object-fit:cover;opacity:.35;filter:brightness(.8) saturate(1.2)}
+.header-hero-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(to bottom,rgba(13,13,26,.2) 0%,rgba(13,13,26,.8) 100%)
+}
+.header-content{
+  position:absolute;bottom:0;left:0;right:0;padding:16px 20px;
+  display:flex;align-items:flex-end;gap:14px
+}
+.logo-circle{
+  width:58px;height:58px;border-radius:50%;
+  background:linear-gradient(135deg,var(--italian-green),var(--italian-red));
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.8rem;border:3px solid rgba(255,255,255,.3);
+  box-shadow:0 4px 20px rgba(0,0,0,.5);flex-shrink:0
+}
+.logo-text{flex:1}
+.logo-text h1{font-family:'Playfair Display',serif;font-size:1.5rem;font-weight:900;
+  background:linear-gradient(135deg,#fff,#d4ac0d);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1}
+.logo-text p{font-size:.72rem;color:rgba(255,255,255,.6);margin-top:2px;letter-spacing:.5px}
+.header-badges{display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.streak-pill{background:linear-gradient(135deg,#e67e22,#e74c3c);color:#fff;
+  font-weight:700;padding:4px 10px;border-radius:20px;font-size:.75rem}
+.xp-pill{background:linear-gradient(135deg,#d4ac0d,#f39c12);color:#000;
+  font-weight:700;padding:3px 8px;border-radius:12px;font-size:.72rem}
+
+/* ── NAV ── */
+.app-nav{display:flex;gap:0;overflow-x:auto;scrollbar-width:none;background:rgba(10,10,20,.9);backdrop-filter:blur(10px)}
+.app-nav::-webkit-scrollbar{display:none}
+.nav-btn{flex-shrink:0;padding:11px 14px;border:none;background:none;color:var(--sub);
+  cursor:pointer;font-size:.72rem;font-weight:600;letter-spacing:.3px;
+  border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap}
+.nav-btn.active{color:#fff;border-bottom-color:var(--gold)}
+.nav-btn:hover{color:var(--text)}
+
+/* ── MAIN ── */
+#app{max-width:680px;margin:0 auto;padding:14px 12px 80px}
+
+/* ── CARDS ── */
+.card{background:var(--card);border-radius:var(--radius);padding:18px;
+  margin-bottom:12px;border:1px solid var(--border);
+  box-shadow:0 4px 20px rgba(0,0,0,.3)}
+.card-glass{background:rgba(22,22,38,.7);backdrop-filter:blur(10px)}
+
+/* ── TOPIC GRID ── */
+.topic-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(148px,1fr));gap:10px}
+.topic-card{border-radius:16px;overflow:hidden;cursor:pointer;
+  transition:transform .2s,box-shadow .2s;position:relative;
+  border:2px solid transparent;box-shadow:0 4px 15px rgba(0,0,0,.3)}
+.topic-card:hover{transform:translateY(-3px);box-shadow:0 8px 25px rgba(0,0,0,.5)}
+.topic-img{width:100%;height:90px;object-fit:cover;display:block;filter:brightness(.7)}
+.topic-img-overlay{position:absolute;top:0;left:0;right:0;height:90px;
+  background:linear-gradient(to bottom,transparent 30%,rgba(0,0,0,.7))}
+.topic-body{padding:10px 10px 8px;position:relative}
+.topic-icon{position:absolute;top:-18px;left:10px;font-size:1.4rem;
+  background:var(--card);border-radius:10px;padding:3px 7px;border:1px solid var(--border)}
+.topic-name{font-weight:700;font-size:.85rem;margin-top:6px;padding-top:4px}
+.topic-meta{font-size:.7rem;color:var(--sub);margin-top:2px}
+.topic-bar{height:4px;background:var(--border);border-radius:2px;margin-top:8px;overflow:hidden}
+.topic-bar div{height:100%;border-radius:2px;transition:width .6s}
+.topic-card.mastered{border-color:var(--gold);box-shadow:0 0 20px rgba(212,172,13,.2)}
+.mastered-badge{position:absolute;top:6px;right:6px;font-size:.65rem;
+  background:var(--gold);color:#000;border-radius:8px;padding:2px 6px;font-weight:800}
+
+/* ── LEVEL LOCKS ── */
+.level-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.lv-tab{padding:6px 12px;border-radius:20px;border:1px solid var(--border);
+  background:var(--accent);color:var(--sub);cursor:pointer;font-size:.78rem;
+  font-weight:600;transition:all .2s;position:relative}
+.lv-tab.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+.lv-tab.locked{opacity:.5;cursor:not-allowed}
+.lv-tab .lock-ico{margin-right:3px}
+.unlock-banner{background:linear-gradient(135deg,#27ae60,#1a6b3c);border-radius:12px;
+  padding:14px;margin-bottom:10px;text-align:center;
+  border:1px solid rgba(255,255,255,.1);animation:glowGreen 2s ease infinite}
+@keyframes glowGreen{0%,100%{box-shadow:0 0 10px rgba(39,174,96,.3)}50%{box-shadow:0 0 25px rgba(39,174,96,.6)}}
+
+/* ── VOCAB CARD ── */
+.vcard{min-height:200px;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;text-align:center;cursor:pointer;
+  transition:transform .15s;position:relative;
+  background:linear-gradient(135deg,#161626,#1e1e35)}
+.vcard:hover{transform:translateY(-2px)}
+.vcard::before{content:'';position:absolute;inset:0;border-radius:var(--radius);
+  background:linear-gradient(135deg,rgba(36,113,163,.1),rgba(125,60,152,.1));pointer-events:none}
+.vcard .word{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;
+  margin-bottom:4px;line-height:1.2}
+.vcard .word-info{font-size:.78rem;color:var(--orange);margin-bottom:8px;font-style:italic}
+.vcard .direction-badge{font-size:.75rem;padding:3px 10px;border-radius:12px;
+  background:rgba(255,255,255,.07);color:var(--sub);margin-bottom:8px;display:inline-block}
+.vcard .flip-hint{font-size:.7rem;color:var(--sub);margin-top:12px;
+  animation:pulse2 2s ease infinite}
+@keyframes pulse2{0%,100%{opacity:.5}50%{opacity:1}}
+.vcard .translation{font-family:'Playfair Display',serif;font-size:1.4rem;
+  font-weight:700;color:var(--green);margin-top:10px;display:none}
+.vcard .translation.show{display:block}
+.vcard .trans-info{font-size:.75rem;color:var(--orange);font-style:italic;display:none}
+.vcard .trans-info.show{display:block}
+.vcard .example{font-size:.85rem;color:#b0c4de;font-style:italic;
+  margin-top:10px;display:none;line-height:1.6;padding:0 10px}
+.vcard .example.show{display:block}
+.speak-btn{position:absolute;top:12px;right:12px;background:rgba(255,255,255,.08);
+  border:none;color:var(--sub);cursor:pointer;font-size:1.1rem;
+  padding:6px;border-radius:10px;transition:background .2s}
+.speak-btn:hover{background:rgba(255,255,255,.15)}
+
+/* ── RATINGS ── */
+.ratings{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
+.ratings button{padding:10px 4px;border:none;border-radius:12px;cursor:pointer;
+  font-weight:700;color:#fff;font-size:.78rem;transition:transform .15s,opacity .2s}
+.ratings button:hover{transform:translateY(-1px);opacity:.9}
+.r0{background:linear-gradient(135deg,#922b21,#c0392b)}
+.r1{background:linear-gradient(135deg,#935116,#e67e22)}
+.r2{background:linear-gradient(135deg,#1a5276,#2980b9)}
+.r3{background:linear-gradient(135deg,#1e8449,#27ae60)}
+
+/* ── PROGRESS ── */
+.prog-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden;margin:8px 0}
+.prog-bar div{height:100%;background:linear-gradient(90deg,var(--blue),var(--purple));transition:width .4s}
+
+/* ── STATS ── */
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;text-align:center}
+.stat-box{background:var(--accent);padding:14px 8px;border-radius:14px;
+  border:1px solid var(--border)}
+.stat-box .val{font-size:1.6rem;font-weight:700;
+  background:linear-gradient(135deg,var(--green),var(--blue));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat-box .lbl{font-size:.68rem;color:var(--sub);margin-top:3px;letter-spacing:.3px}
+
+/* ── GAME ── */
+.game-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.game-opts button{padding:14px 8px;border:none;border-radius:14px;
+  background:var(--accent);color:var(--text);cursor:pointer;
+  font-size:.88rem;font-weight:500;transition:all .2s;border:1px solid var(--border)}
+.game-opts button:hover{background:var(--border)}
+.game-opts button.correct{background:linear-gradient(135deg,#1e8449,#27ae60);border-color:var(--green)}
+.game-opts button.wrong{background:linear-gradient(135deg,#922b21,#c0392b);border-color:var(--red)}
+
+/* ── AUDIO ── */
+.audio-card{text-align:center;padding:24px 18px}
+.audio-word{font-family:'Playfair Display',serif;font-size:2.4rem;font-weight:900;
+  margin:16px 0 4px;line-height:1.1}
+.audio-info{font-size:.82rem;color:var(--orange);font-style:italic;margin-bottom:6px}
+.audio-trans{font-size:1.3rem;color:var(--green);margin-bottom:8px;font-weight:600}
+.audio-ex{font-style:italic;color:#b0c4de;margin-bottom:18px;font-size:.88rem;line-height:1.6}
+.mic-btn{width:74px;height:74px;border-radius:50%;border:none;cursor:pointer;
+  font-size:1.9rem;background:linear-gradient(135deg,var(--blue),var(--purple));
+  color:#fff;box-shadow:0 6px 20px rgba(36,113,163,.4);transition:transform .15s}
+.mic-btn.listening{background:linear-gradient(135deg,#922b21,#c0392b);
+  box-shadow:0 6px 20px rgba(192,57,43,.5);animation:micPulse 1s infinite}
+@keyframes micPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.auto-btns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px}
+
+/* ── BUTTONS ── */
+.btn{padding:9px 16px;border:none;border-radius:12px;cursor:pointer;
+  font-weight:700;font-size:.85rem;transition:all .2s;color:#fff}
+.btn:hover{opacity:.85;transform:translateY(-1px)}
+.btn-blue{background:linear-gradient(135deg,#1a5276,#2471a3)}
+.btn-green{background:linear-gradient(135deg,#1e8449,#27ae60)}
+.btn-orange{background:linear-gradient(135deg,#935116,#e67e22)}
+.btn-red{background:linear-gradient(135deg,#922b21,#c0392b)}
+.btn-purple{background:linear-gradient(135deg,#512e7d,#7d3c98)}
+.btn-gold{background:linear-gradient(135deg,#9a7d0a,#d4ac0d);color:#000}
+
+/* ── FORM ── */
+.form-row{display:flex;gap:7px;margin-bottom:8px;flex-wrap:wrap}
+.form-input{flex:1;min-width:80px;padding:10px 12px;border-radius:12px;
+  border:1px solid var(--border);background:var(--accent);color:var(--text);
+  font-size:.88rem;outline:none;transition:border-color .2s}
+.form-input:focus{border-color:var(--blue)}
+textarea.form-input{resize:vertical;min-height:60px}
+select.form-input{cursor:pointer}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;
+  display:flex;align-items:center;justify-content:center;padding:12px;
+  backdrop-filter:blur(6px)}
+.modal-box{background:var(--card);border-radius:20px;max-width:520px;width:100%;
+  max-height:92vh;overflow-y:auto;border:1px solid var(--border);
+  box-shadow:0 20px 60px rgba(0,0,0,.7)}
+.modal-hero{width:100%;height:140px;object-fit:cover;border-radius:20px 20px 0 0;
+  display:block;filter:brightness(.7)}
+.modal-header{padding:16px 18px;border-bottom:1px solid var(--border)}
+.modal-body{padding:16px 18px}
+
+/* ── WORD ROWS ── */
+.wrow{display:flex;align-items:center;padding:9px 4px;
+  border-bottom:1px solid var(--border);gap:7px;font-size:.85rem}
+.wrow .it{flex:1.2;font-weight:600}
+.wrow .de{flex:1;color:var(--sub)}
+.wrow .info{flex:.9;font-size:.72rem;color:var(--orange);font-style:italic}
+.wrow .lvl-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.wlist{max-height:260px;overflow-y:auto}
+
+/* ── SECTION TITLE ── */
+.section-title{font-family:'Playfair Display',serif;font-size:1.05rem;
+  font-weight:700;margin-bottom:12px;color:var(--text)}
+.section-label{font-size:.78rem;color:var(--sub);margin-bottom:10px;letter-spacing:.3px}
+
+/* ── MISC ── */
+.hidden{display:none!important}
+.tag{font-size:.7rem;padding:2px 7px;border-radius:8px;background:var(--accent);
+  color:var(--sub);display:inline-block;margin:2px}
+.divider{height:1px;background:var(--border);margin:12px 0}
+.text-gold{color:var(--gold)}
+.text-green{color:var(--green)}
+.text-red{color:var(--red)}
+.text-orange{color:var(--orange)}
+
+@media(max-width:400px){
+  .vcard .word{font-size:1.55rem}
+  .ratings{grid-template-columns:repeat(2,1fr)}
+  .topic-grid{grid-template-columns:repeat(2,1fr)}
+  .header-hero{height:150px}
+  .audio-word{font-size:1.8rem}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="app-header">
+  <div class="header-hero">
+    <img id="headerImg" src="https://images.unsplash.com/photo-1499678329028-101435549a4e?w=800&q=80" alt="Italia">
+    <div class="header-hero-overlay"></div>
+    <div class="header-content">
+      <div class="logo-circle">🇮🇹</div>
+      <div class="logo-text">
+        <h1>Italiano</h1>
+        <p>VOKABELTRAINER · A2–B1</p>
+      </div>
+      <div class="header-badges">
+        <div class="streak-pill" id="streakBadge">🔥 0 Tage</div>
+        <div class="xp-pill" id="xpDisplay">⭐ 0 XP · Lv.1</div>
+      </div>
+    </div>
+  </div>
+  <nav class="app-nav">
+    <button class="nav-btn active" onclick="showView('topics')">🗂 Themen</button>
+    <button class="nav-btn" onclick="showView('learn')">📖 Lernen</button>
+    <button class="nav-btn" onclick="showView('weak')">⚡ Schwach</button>
+    <button class="nav-btn" onclick="showView('review')">🔄 Review</button>
+    <button class="nav-btn" onclick="showView('game')">🎮 Spiel</button>
+    <button class="nav-btn" onclick="showView('audio')">🚗 Auto</button>
+    <button class="nav-btn" onclick="showView('words')">➕ Wörter</button>
+    <button class="nav-btn" onclick="showView('stats')">📊 Stats</button>
+  </nav>
+</div>
+
+<div id="app">
+
+<!-- ══ TOPICS VIEW ══ -->
+<div id="view-topics">
+  <div id="unlockBanner" class="hidden unlock-banner">
+    <div style="font-size:1.1rem;font-weight:700">🔓 Neues Level freigeschaltet!</div>
+    <div id="unlockMsg" style="font-size:.83rem;margin-top:4px;opacity:.9"></div>
+  </div>
+  <div class="card" style="margin-bottom:10px;padding:12px 16px">
+    <div style="font-size:.8rem;color:var(--sub);line-height:1.6">
+      Jeder Themenbereich hat <strong style="color:var(--text)">3 Schwierigkeitslevel</strong>.
+      Erreiche <strong style="color:var(--gold)">75% Meisterschaft</strong> im aktuellen Level, um das nächste freizuschalten. 🏆
+    </div>
+  </div>
+  <div class="topic-grid" id="topicGrid"></div>
+</div>
+
+<!-- ══ TOPIC MODAL ══ -->
+<div class="modal-overlay hidden" id="topicModal">
+  <div class="modal-box">
+    <img id="modalHeroImg" class="modal-hero" src="" alt="">
+    <div class="modal-header">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <span id="modalIcon" style="font-size:1.5rem"></span>
+        <div style="flex:1">
+          <div id="modalTitle" style="font-weight:700;font-size:1rem;font-family:'Playfair Display',serif"></div>
+          <div id="modalStats" style="font-size:.75rem;color:var(--sub);margin-top:2px"></div>
+        </div>
+        <button class="btn btn-blue" onclick="startTopicSession()">▶ Lernen</button>
+        <button class="btn btn-red" onclick="closeModal()" style="padding:9px 12px">✕</button>
+      </div>
+      <!-- LEVEL TABS -->
+      <div class="level-tabs" style="margin-top:12px" id="modalLevelTabs"></div>
+    </div>
+    <div class="modal-body">
+      <div id="modalWordList"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ LEARN VIEW ══ -->
+<div id="view-learn" class="hidden">
+  <div class="card" style="padding:12px 16px;margin-bottom:8px">
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <select class="form-input" id="dirSelect" onchange="resetSession()" style="flex:0 0 auto">
+        <option value="de2it">🇩🇪 → 🇮🇹</option>
+        <option value="it2de">🇮🇹 → 🇩🇪</option>
+        <option value="both">↕ Gemischt</option>
+      </select>
+      <span id="sessionTopicLabel" style="font-size:.78rem;color:var(--sub);flex:1"></span>
+      <button class="btn btn-blue" onclick="resetSession()" style="padding:8px 12px">🔀</button>
+    </div>
+  </div>
+  <div id="sessionInfo" style="margin-bottom:6px;font-size:.78rem;color:var(--sub);padding:0 2px"></div>
+  <div class="prog-bar"><div id="learnProg" style="width:0%"></div></div>
+
+  <div class="card vcard" id="vocabCard" onclick="flipCard()">
+    <button class="speak-btn" onclick="event.stopPropagation();speakCurrent()">🔊</button>
+    <div class="direction-badge" id="cardHint"></div>
+    <div class="word" id="cardWord">–</div>
+    <div class="word-info" id="cardInfo"></div>
+    <div class="flip-hint">Tippen zum Aufdecken ✨</div>
+    <div class="translation" id="cardTrans"></div>
+    <div class="trans-info" id="cardTransInfo"></div>
+    <div class="example" id="cardEx"></div>
+  </div>
+
+  <div id="ratingArea" class="hidden">
+    <div style="font-size:.78rem;color:var(--sub);margin-bottom:6px;text-align:center;letter-spacing:.3px">WIE GUT WUSSTEST DU ES?</div>
+    <div class="ratings">
+      <button class="r0" onclick="rate(0)">😵<br><span style="font-size:.7rem">Gar nicht</span></button>
+      <button class="r1" onclick="rate(1)">😕<br><span style="font-size:.7rem">Schwer</span></button>
+      <button class="r2" onclick="rate(2)">🙂<br><span style="font-size:.7rem">Fast</span></button>
+      <button class="r3" onclick="rate(3)">😄<br><span style="font-size:.7rem">Super!</span></button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ WEAK VIEW ══ -->
+<div id="view-weak" class="hidden">
+  <div class="card">
+    <div class="section-title">⚡ Schwache Wörter</div>
+    <div class="section-label">Konsolidiert über alle Themenbereiche & Level</div>
+    <div class="stat-grid" id="weakStats" style="margin-bottom:14px"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-red" onclick="startWeakSession()">🎯 Schwache üben</button>
+      <button class="btn btn-orange" onclick="startForgottenSession()">⏰ Fast vergessen</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="section-title">Schwach nach Thema</div>
+    <div id="weakByTopic"></div>
+  </div>
+</div>
+
+<!-- ══ REVIEW VIEW ══ -->
+<div id="view-review" class="hidden">
+  <div class="card">
+    <div class="section-title">🔄 Spaced Repetition Review</div>
+    <div class="section-label">Gut gelernte Wörter – damit du sie nicht vergisst</div>
+    <div class="stat-grid" id="reviewStats" style="margin-bottom:14px"></div>
+    <button class="btn btn-purple" onclick="startReviewSession()">🔄 Jetzt wiederholen</button>
+  </div>
+  <div class="card">
+    <div class="section-title">Bald fällig</div>
+    <div id="upcomingReviews"></div>
+  </div>
+</div>
+
+<!-- ══ GAME VIEW ══ -->
+<div id="view-game" class="hidden">
+  <div class="card" style="text-align:center">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <span style="font-family:'Playfair Display',serif;font-size:1.1rem">🎮 Quiz</span>
+      <span style="font-weight:700;color:var(--gold);font-size:1rem" id="gameScore">Score: 0</span>
+    </div>
+    <div style="font-size:.8rem;color:var(--sub);letter-spacing:.3px" id="gamePrompt">ÜBERSETZUNG?</div>
+    <div style="font-family:'Playfair Display',serif;font-size:1.9rem;font-weight:700;margin:14px 0 2px" id="gameWord">–</div>
+    <div style="font-size:.78rem;color:var(--orange);font-style:italic;margin-bottom:4px" id="gameWordInfo"></div>
+    <div class="game-opts" id="gameOpts"></div>
+    <div id="gameFeedback" style="margin-top:12px;min-height:36px;font-style:italic;font-size:.83rem;color:var(--sub);line-height:1.5"></div>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button class="btn btn-blue" onclick="startGame()">🔄 Neue Runde</button>
+    <button class="btn btn-orange" onclick="startWeakGame()">⚡ Nur Schwache</button>
+  </div>
+</div>
+
+<!-- ══ AUDIO VIEW ══ -->
+<div id="view-audio" class="hidden">
+  <div class="card audio-card">
+    <div style="font-size:.85rem;color:var(--orange);font-weight:600;letter-spacing:.5px">🚗 AUTO-MODUS</div>
+    <div class="audio-word" id="audioWord">–</div>
+    <div class="audio-info" id="audioInfo"></div>
+    <div class="audio-trans" id="audioTrans"></div>
+    <div class="audio-ex" id="audioEx"></div>
+    <div class="auto-btns">
+      <button class="btn btn-orange" onclick="audioPrev()">⬅ Zurück</button>
+      <button class="mic-btn" id="micBtn" onclick="toggleListen()">🎤</button>
+      <button class="btn btn-orange" onclick="audioNext()">Weiter ➡</button>
+    </div>
+    <div id="micStatus" style="margin-top:10px;font-size:.75rem;color:var(--sub)">"weiter" · "zurück" · "wiederholen"</div>
+    <div class="auto-btns" style="margin-top:14px">
+      <button class="btn btn-green" onclick="startAutoPlay()">▶ Auto-Play</button>
+      <button class="btn btn-red" onclick="stopAutoPlay()">⏹ Stop</button>
+      <select class="form-input" id="audioFilterSel" onchange="audioFilter()" style="flex:0 0 auto">
+        <option value="all">Alle Wörter</option>
+        <option value="weak">Nur Schwache</option>
+        <option value="due">Nur Fällige</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<!-- ══ WORDS VIEW ══ -->
+<div id="view-words" class="hidden">
+  <div class="card">
+    <div class="section-title">➕ Wort hinzufügen</div>
+    <div class="form-row">
+      <input class="form-input" id="newIt" placeholder="🇮🇹 Italiano">
+      <input class="form-input" id="newDe" placeholder="🇩🇪 Deutsch">
+    </div>
+    <div class="form-row">
+      <input class="form-input" id="newInfo" placeholder='Grammatik (m/f / io sono, tu sei...)'>
+    </div>
+    <div class="form-row">
+      <textarea class="form-input" id="newEx" placeholder="Esempio: La casa è bella."></textarea>
+    </div>
+    <div class="form-row">
+      <select class="form-input" id="newCat">
+        <option value="custom">⭐ Eigene</option>
+        <option value="basics">💬 Alltag</option>
+        <option value="travel">✈️ Reisen</option>
+        <option value="food">🍝 Essen</option>
+        <option value="work">💼 Arbeit</option>
+        <option value="body">🏥 Körper</option>
+        <option value="family">👨‍👩‍👧 Familie</option>
+        <option value="city">🏙️ Stadt</option>
+        <option value="time">🗓️ Zeit</option>
+        <option value="verbs">🔤 Verben</option>
+        <option value="adj">🎨 Adjektive</option>
+      </select>
+      <select class="form-input" id="newLevel">
+        <option value="0">Level 1 (Basis)</option>
+        <option value="1">Level 2 (Erweitert)</option>
+        <option value="2">Level 3 (Fortgeschritten)</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-green" onclick="addWord()">✓ Hinzufügen</button>
+      <button class="btn btn-orange" onclick="startVoiceAdd()">🎤 Sprache</button>
+    </div>
+    <div id="voiceAddStatus" style="font-size:.75rem;color:var(--sub);margin-top:6px"></div>
+  </div>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:6px">
+      <span class="section-title" style="margin:0">Vokabeln (<span id="wordCount">0</span>)</span>
+      <input class="form-input" id="searchWord" placeholder="🔍 Suchen..." style="width:140px" oninput="renderWordList()">
+    </div>
+    <div class="wlist" id="wordList"></div>
+  </div>
+  <div style="display:flex;gap:8px">
+    <button class="btn btn-orange" onclick="exportData()">💾 Export</button>
+    <button class="btn btn-blue" onclick="importData()">📂 Import</button>
+  </div>
+</div>
+
+<!-- ══ STATS VIEW ══ -->
+<div id="view-stats" class="hidden">
+  <div class="card">
+    <div class="section-title">📊 Deine Statistiken</div>
+    <div class="stat-grid" id="statGrid"></div>
+  </div>
+  <div class="card">
+    <div class="section-title">Level-Verteilung</div>
+    <div id="levelBreakdown"></div>
+  </div>
+  <div class="card">
+    <div class="section-title">Fortschritt nach Thema</div>
+    <div id="topicBreakdown"></div>
+  </div>
+</div>
+
+</div><!-- /app -->
+
+<script>
+// ══════════════════════════════════════════════════════════════════════════
+// TOPICS CONFIG
+// ══════════════════════════════════════════════════════════════════════════
+const TOPICS = [
+  {id:'basics', name:'Alltag & Basics',      icon:'💬', color:'#2471a3',
+   img:'https://images.unsplash.com/photo-1529260830199-42c24126f198?w=400&q=75'},
+  {id:'travel', name:'Reisen & Transport',   icon:'✈️',  color:'#16a085',
+   img:'https://images.unsplash.com/photo-1515542622106-078bda21acaf?w=400&q=75'},
+  {id:'food',   name:'Essen & Trinken',       icon:'🍝', color:'#ca6f1e',
+   img:'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400&q=75'},
+  {id:'work',   name:'Arbeit & Büro',         icon:'💼', color:'#7d3c98',
+   img:'https://images.unsplash.com/photo-1497366216548-37526070297c?w=400&q=75'},
+  {id:'body',   name:'Körper & Gesundheit',   icon:'🏥', color:'#c0392b',
+   img:'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?w=400&q=75'},
+  {id:'family', name:'Familie & Beziehungen', icon:'👨‍👩‍👧', color:'#d35400',
+   img:'https://images.unsplash.com/photo-1511895426328-dc8714191011?w=400&q=75'},
+  {id:'city',   name:'Stadt & Einkaufen',     icon:'🏙️', color:'#27ae60',
+   img:'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=400&q=75'},
+  {id:'time',   name:'Zeit & Kalender',       icon:'🗓️', color:'#2c3e50',
+   img:'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=75'},
+  {id:'verbs',  name:'Wichtige Verben',       icon:'🔤', color:'#922b21',
+   img:'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&q=75'},
+  {id:'adj',    name:'Adjektive',             icon:'🎨', color:'#1a6b3c',
+   img:'https://images.unsplash.com/photo-1547891654-e66ed7ebb968?w=400&q=75'},
+  {id:'custom', name:'Eigene Wörter',         icon:'⭐', color:'#9a7d0a',
+   img:'https://images.unsplash.com/photo-1516483638261-f4dbaf036963?w=400&q=75'},
+];
+
+// Level definitions per topic category
+// Each topic has 3 difficulty levels (0=Basis, 1=Erweitert, 2=Fortgeschritten)
+// Words are tagged with difficulty 0,1,2 via 'diff' field
+
+// ══════════════════════════════════════════════════════════════════════════
+// VOCABULARY
+// ══════════════════════════════════════════════════════════════════════════
+const BUILTIN=[
+// BASICS L0
+{it:'ciao',de:'Hallo / Tschüss',info:'Grußformel (informell)',ex:'Ciao, come stai oggi?',cat:'basics',diff:0},
+{it:'buongiorno',de:'Guten Morgen / Tag',info:'Grußformel (formell)',ex:'Buongiorno, signora Rossi!',cat:'basics',diff:0},
+{it:'buonasera',de:'Guten Abend',info:'Grußformel',ex:'Buonasera a tutti!',cat:'basics',diff:0},
+{it:'grazie',de:'Danke',info:'Dankesformel',ex:'Grazie mille per il tuo aiuto!',cat:'basics',diff:0},
+{it:'prego',de:'Bitte / Gern geschehen',info:'Antwort auf grazie',ex:'Prego, non c\'è problema.',cat:'basics',diff:0},
+{it:'per favore',de:'Bitte (Bitten)',info:'Bittformel',ex:'Un caffè per favore, grazie.',cat:'basics',diff:0},
+{it:'scusa / scusi',de:'Entschuldigung',info:'informell / formell',ex:'Scusi, dov\'è la stazione?',cat:'basics',diff:0},
+{it:'sì',de:'Ja',info:'Bestätigung',ex:'Sì, capisco perfettamente.',cat:'basics',diff:0},
+{it:'no',de:'Nein',info:'Verneinung',ex:'No, non ho capito.',cat:'basics',diff:0},
+{it:'come stai?',de:'Wie geht es dir?',info:'informell (tu)',ex:'Ciao Marco, come stai?',cat:'basics',diff:0},
+{it:'bene',de:'Gut',info:'Adverb',ex:'Sto molto bene, grazie!',cat:'basics',diff:0},
+{it:'mi chiamo...',de:'Ich heiße...',info:'Vorstellung',ex:'Mi chiamo Luca, piacere!',cat:'basics',diff:0},
+{it:'piacere',de:'Freut mich',info:'Begrüßungsformel',ex:'Piacere di conoscerti!',cat:'basics',diff:0},
+{it:'non capisco',de:'Ich verstehe nicht',info:'Redewendung',ex:'Mi dispiace, non capisco.',cat:'basics',diff:0},
+{it:'dov\'è...?',de:'Wo ist...?',info:'Frage',ex:'Dov\'è il bagno, per favore?',cat:'basics',diff:0},
+{it:'quanto costa?',de:'Wie viel kostet das?',info:'Frage',ex:'Scusi, quanto costa questa borsa?',cat:'basics',diff:0},
+{it:'aiuto!',de:'Hilfe!',info:'Notfall',ex:'Aiuto! Ho perso il portafoglio!',cat:'basics',diff:0},
+{it:'oggi',de:'heute',info:'Adverb',ex:'Oggi fa molto caldo.',cat:'basics',diff:0},
+// BASICS L1
+{it:'forse',de:'Vielleicht',info:'Adverb',ex:'Forse vengo anch\'io domani.',cat:'basics',diff:1},
+{it:'può ripetere?',de:'Können Sie wiederholen?',info:'formelle Bitte',ex:'Può ripetere più lentamente?',cat:'basics',diff:1},
+{it:'dove abiti?',de:'Wo wohnst du?',info:'Frage (informell)',ex:'Dove abiti? A Milano o a Roma?',cat:'basics',diff:1},
+{it:'parla italiano?',de:'Sprechen Sie Italienisch?',info:'formell',ex:'Scusi, parla italiano lentamente?',cat:'basics',diff:1},
+{it:'un po\'',de:'Ein bisschen',info:'Adverb',ex:'Parlo italiano un po\'.',cat:'basics',diff:1},
+{it:'sempre',de:'Immer',info:'Adverb',ex:'Vado sempre in ufficio a piedi.',cat:'basics',diff:1},
+{it:'mai',de:'Nie',info:'Adverb',ex:'Non ho mai visitato Venezia.',cat:'basics',diff:1},
+{it:'adesso / ora',de:'Jetzt',info:'Adverb',ex:'Adesso non ho tempo, scusa.',cat:'basics',diff:1},
+{it:'certo',de:'Natürlich / Sicher',info:'Bestätigung',ex:'Certo, posso aiutarti!',cat:'basics',diff:1},
+{it:'subito',de:'Sofort',info:'Adverb',ex:'Arrivo subito, aspetta un momento.',cat:'basics',diff:1},
+{it:'capisco',de:'Ich verstehe',info:'Redewendung',ex:'Sì, capisco, grazie per la spiegazione.',cat:'basics',diff:1},
+{it:'come si dice...?',de:'Wie sagt man...?',info:'Sprachlernformel',ex:'Come si dice "Danke" in italiano?',cat:'basics',diff:1},
+{it:'non lo so',de:'Ich weiß es nicht',info:'Redewendung',ex:'Mi dispiace, non lo so.',cat:'basics',diff:1},
+{it:'abito a...',de:'Ich wohne in...',info:'Ortsangabe',ex:'Abito a Vienna, in Austria.',cat:'basics',diff:1},
+// BASICS L2
+{it:'mi fa piacere',de:'Es freut mich (formell)',info:'Redewendung',ex:'Mi fa molto piacere conoscerla.',cat:'basics',diff:2},
+{it:'come mai?',de:'Wieso denn? / Wie kommt das?',info:'Frage (informell)',ex:'Come mai sei così triste oggi?',cat:'basics',diff:2},
+{it:'non è vero?',de:'Stimmt\'s? / Nicht wahr?',info:'Bestätigungsfrage',ex:'Hai ragione, non è vero?',cat:'basics',diff:2},
+{it:'a proposito',de:'Übrigens / Apropos',info:'Redewendung',ex:'A proposito, hai visto Marco ultimamente?',cat:'basics',diff:2},
+{it:'in effetti',de:'Eigentlich / Tatsächlich',info:'Adverb',ex:'In effetti hai ragione tu.',cat:'basics',diff:2},
+{it:'comunque',de:'Jedenfalls / Wie auch immer',info:'Adverb',ex:'Comunque, ci penserò io.',cat:'basics',diff:2},
+// TRAVEL L0
+{it:'il treno',de:'der Zug',info:'m',ex:'Il treno per Milano parte alle otto.',cat:'travel',diff:0},
+{it:'l\'autobus',de:'der Bus',info:'m',ex:'L\'autobus numero 40 va in centro.',cat:'travel',diff:0},
+{it:'la stazione',de:'der Bahnhof',info:'f',ex:'La stazione è vicino al centro città.',cat:'travel',diff:0},
+{it:'l\'albergo',de:'das Hotel',info:'m',ex:'L\'albergo ha una bellissima vista sul mare.',cat:'travel',diff:0},
+{it:'il biglietto',de:'das Ticket / die Fahrkarte',info:'m',ex:'Ho comprato il biglietto online ieri.',cat:'travel',diff:0},
+{it:'la camera',de:'das Zimmer',info:'f',ex:'Vorrei una camera doppia per tre notti.',cat:'travel',diff:0},
+{it:'il passaporto',de:'der Reisepass',info:'m',ex:'Non dimenticare il passaporto!',cat:'travel',diff:0},
+{it:'destra / sinistra',de:'rechts / links',info:'Richtungsangabe',ex:'Gira a destra dopo il semaforo.',cat:'travel',diff:0},
+{it:'dritto',de:'geradeaus',info:'Richtungsangabe',ex:'Continua dritto per duecento metri.',cat:'travel',diff:0},
+{it:'vicino / lontano',de:'nah / weit',info:'Adjektive',ex:'L\'albergo è vicino alla stazione.',cat:'travel',diff:0},
+{it:'la valigia',de:'der Koffer',info:'f',ex:'La mia valigia è troppo pesante.',cat:'travel',diff:0},
+{it:'il viaggio',de:'die Reise / Fahrt',info:'m',ex:'Buon viaggio! Ci vediamo al ritorno.',cat:'travel',diff:0},
+{it:'la vacanza',de:'der Urlaub',info:'f (Pl: le vacanze)',ex:'Quest\'estate vado in vacanza in Sicilia.',cat:'travel',diff:0},
+{it:'prenotare',de:'reservieren / buchen',info:'Verb reg. (-are)',ex:'Ho prenotato l\'albergo per due notti.',cat:'travel',diff:0},
+// TRAVEL L1
+{it:'l\'aereo',de:'das Flugzeug',info:'m',ex:'L\'aereo è in ritardo di un\'ora.',cat:'travel',diff:1},
+{it:'l\'aeroporto',de:'der Flughafen',info:'m',ex:'L\'aeroporto di Roma si chiama Fiumicino.',cat:'travel',diff:1},
+{it:'la metropolitana',de:'die U-Bahn',info:'f (abbr: metro)',ex:'Prendo la metropolitana ogni giorno.',cat:'travel',diff:1},
+{it:'il binario',de:'das Gleis / Bahnsteig',info:'m',ex:'Il treno parte dal binario cinque.',cat:'travel',diff:1},
+{it:'il ritardo',de:'die Verspätung',info:'m',ex:'Il treno ha venti minuti di ritardo.',cat:'travel',diff:1},
+{it:'la partenza',de:'die Abfahrt',info:'f',ex:'La partenza è alle quindici e trenta.',cat:'travel',diff:1},
+{it:'l\'arrivo',de:'die Ankunft',info:'m',ex:'L\'arrivo previsto è alle diciassette.',cat:'travel',diff:1},
+{it:'la prenotazione',de:'die Reservierung',info:'f',ex:'Ho una prenotazione a nome Müller.',cat:'travel',diff:1},
+{it:'cambiare (treno)',de:'umsteigen',info:'Verb reg. (-are)',ex:'Devo cambiare treno a Bologna.',cat:'travel',diff:1},
+{it:'noleggiare',de:'mieten / leihen',info:'Verb reg. (-are)',ex:'Voglio noleggiare una macchina.',cat:'travel',diff:1},
+// TRAVEL L2
+{it:'il check-in',de:'der Check-in',info:'m',ex:'Il check-in è alle quattordici.',cat:'travel',diff:2},
+{it:'il tragitto',de:'die Strecke',info:'m',ex:'Il tragitto dura circa due ore.',cat:'travel',diff:2},
+{it:'il doganiere',de:'der Zollbeamte',info:'m',ex:'Il doganiere controlla i bagagli.',cat:'travel',diff:2},
+{it:'il confine',de:'die Grenze',info:'m',ex:'Al confine ci chiedono il passaporto.',cat:'travel',diff:2},
+{it:'la coincidenza',de:'der Anschluss (Zug/Flug)',info:'f',ex:'Ho perso la coincidenza per Roma.',cat:'travel',diff:2},
+// FOOD L0
+{it:'il caffè',de:'der Kaffee (Espresso)',info:'m',ex:'In Italia si beve il caffè al banco.',cat:'food',diff:0},
+{it:'la pasta',de:'die Pasta',info:'f',ex:'La pasta al pomodoro è semplice e buona.',cat:'food',diff:0},
+{it:'la pizza',de:'die Pizza',info:'f',ex:'La pizza napoletana è la migliore!',cat:'food',diff:0},
+{it:'il conto',de:'die Rechnung',info:'m',ex:'Cameriere, il conto per favore!',cat:'food',diff:0},
+{it:'il ristorante',de:'das Restaurant',info:'m',ex:'Stasera mangiamo al ristorante.',cat:'food',diff:0},
+{it:'il menu',de:'die Speisekarte',info:'m',ex:'Posso vedere il menu, per favore?',cat:'food',diff:0},
+{it:'il vino',de:'der Wein',info:'m',ex:'Un bicchiere di vino rosso, per favore.',cat:'food',diff:0},
+{it:'l\'acqua',de:'das Wasser',info:'f',ex:'Acqua naturale o frizzante?',cat:'food',diff:0},
+{it:'il pane',de:'das Brot',info:'m',ex:'In Italia si mangia il pane con tutto.',cat:'food',diff:0},
+{it:'la carne',de:'das Fleisch',info:'f',ex:'Non mangio carne, sono vegetariano.',cat:'food',diff:0},
+{it:'il pesce',de:'der Fisch',info:'m',ex:'In Sicilia si mangia molto pesce fresco.',cat:'food',diff:0},
+{it:'la colazione',de:'das Frühstück',info:'f',ex:'La colazione è inclusa nel prezzo.',cat:'food',diff:0},
+{it:'il pranzo',de:'das Mittagessen',info:'m',ex:'Il pranzo in Italia dura a lungo.',cat:'food',diff:0},
+{it:'la cena',de:'das Abendessen',info:'f',ex:'La cena è pronta alle venti.',cat:'food',diff:0},
+// FOOD L1
+{it:'il risotto',de:'das Risotto',info:'m',ex:'Il risotto ai funghi è il mio preferito.',cat:'food',diff:1},
+{it:'il cappuccino',de:'der Cappuccino',info:'m',ex:'Il cappuccino si beve solo la mattina.',cat:'food',diff:1},
+{it:'il formaggio',de:'der Käse',info:'m',ex:'Il parmigiano è un formaggio famoso.',cat:'food',diff:1},
+{it:'le verdure',de:'das Gemüse',info:'f Pl',ex:'Mangio molte verdure ogni giorno.',cat:'food',diff:1},
+{it:'il cameriere',de:'der Kellner',info:'m / f: la cameriera',ex:'Il cameriere ci porta il vino.',cat:'food',diff:1},
+{it:'l\'antipasto',de:'die Vorspeise',info:'m',ex:'Come antipasto prendiamo la bruschetta.',cat:'food',diff:1},
+{it:'il dolce',de:'das Dessert',info:'m',ex:'Come dolce voglio il tiramisù.',cat:'food',diff:1},
+{it:'vegetariano',de:'vegetarisch',info:'Adj.',ex:'Avete piatti vegetariani nel menu?',cat:'food',diff:1},
+{it:'delizioso',de:'köstlich / lecker',info:'Adj. f: deliziosa',ex:'Questa pasta è assolutamente deliziosa!',cat:'food',diff:1},
+// FOOD L2
+{it:'la trattoria',de:'die Trattoria (einfaches Lokal)',info:'f',ex:'Questa trattoria ha una cucina ottima.',cat:'food',diff:2},
+{it:'il contorno',de:'die Beilage',info:'m',ex:'Come contorno ordino insalata mista.',cat:'food',diff:2},
+{it:'l\'olio d\'oliva',de:'das Olivenöl',info:'m',ex:'L\'olio d\'oliva italiano è eccellente.',cat:'food',diff:2},
+{it:'allergico a',de:'allergisch gegen',info:'Ausdruck',ex:'Sono allergico alle noci.',cat:'food',diff:2},
+{it:'senza glutine',de:'glutenfrei',info:'Ausdruck',ex:'Avete pasta senza glutine?',cat:'food',diff:2},
+// WORK L0
+{it:'il lavoro',de:'die Arbeit / der Beruf',info:'m',ex:'Il mio lavoro è molto interessante.',cat:'work',diff:0},
+{it:'l\'ufficio',de:'das Büro',info:'m',ex:'Lavoro in ufficio cinque giorni a settimana.',cat:'work',diff:0},
+{it:'il collega',de:'der Kollege',info:'m / f: la collega',ex:'I miei colleghi sono simpatici.',cat:'work',diff:0},
+{it:'il capo',de:'der Chef',info:'m / f: la capa',ex:'Il mio capo è molto esigente.',cat:'work',diff:0},
+{it:'la riunione',de:'das Meeting',info:'f',ex:'La riunione inizia alle dieci.',cat:'work',diff:0},
+{it:'il cliente',de:'der Kunde',info:'m / f: la cliente',ex:'Il cliente vuole una risposta rapida.',cat:'work',diff:0},
+{it:'l\'email',de:'die E-Mail',info:'f',ex:'Ti mando l\'email con tutti i dettagli.',cat:'work',diff:0},
+{it:'lavorare',de:'arbeiten',info:'Verb reg. (-are)',ex:'Lavoro per una società tedesca.',cat:'work',diff:0},
+{it:'lo stipendio',de:'das Gehalt',info:'m',ex:'Ho ricevuto un aumento di stipendio.',cat:'work',diff:0},
+// WORK L1
+{it:'il progetto',de:'das Projekt',info:'m',ex:'Stiamo lavorando a un progetto importante.',cat:'work',diff:1},
+{it:'la scadenza',de:'die Deadline',info:'f',ex:'La scadenza del progetto è venerdì.',cat:'work',diff:1},
+{it:'il contratto',de:'der Vertrag',info:'m',ex:'Dobbiamo firmare il contratto.',cat:'work',diff:1},
+{it:'il colloquio',de:'das Vorstellungsgespräch',info:'m',ex:'Ho un colloquio di lavoro domani.',cat:'work',diff:1},
+{it:'le ferie',de:'der Urlaub (Arbeit)',info:'f Pl',ex:'Ho due settimane di ferie in agosto.',cat:'work',diff:1},
+{it:'assumere',de:'einstellen',info:'Verb irreg.',ex:'L\'azienda vuole assumere nuovi dipendenti.',cat:'work',diff:1},
+{it:'la conferenza',de:'die Konferenz',info:'f',ex:'Partecipiamo a una conferenza internazionale.',cat:'work',diff:1},
+// WORK L2
+{it:'la fattura',de:'die Rechnung / Invoice',info:'f',ex:'Emetto la fattura entro fine mese.',cat:'work',diff:2},
+{it:'il budget',de:'das Budget',info:'m',ex:'Il nostro budget per il progetto è limitato.',cat:'work',diff:2},
+{it:'il rapporto',de:'der Bericht',info:'m',ex:'Scrivo il rapporto mensile.',cat:'work',diff:2},
+{it:'licenziare',de:'entlassen',info:'Verb reg. (-are)',ex:'L\'azienda ha licenziato dieci persone.',cat:'work',diff:2},
+{it:'le tasse',de:'die Steuern',info:'f Pl',ex:'Le tasse in Italia sono molto alte.',cat:'work',diff:2},
+// BODY L0
+{it:'la testa',de:'der Kopf',info:'f',ex:'Ho mal di testa da questa mattina.',cat:'body',diff:0},
+{it:'la mano',de:'die Hand',info:'f (Pl: le mani)',ex:'Mi si è tagliata la mano.',cat:'body',diff:0},
+{it:'il piede',de:'der Fuß',info:'m (Pl: i piedi)',ex:'Ho un dolore al piede sinistro.',cat:'body',diff:0},
+{it:'il medico',de:'der Arzt',info:'m / f: la dottoressa',ex:'Devo andare dal medico domani.',cat:'body',diff:0},
+{it:'l\'ospedale',de:'das Krankenhaus',info:'m',ex:'Portalo subito all\'ospedale!',cat:'body',diff:0},
+{it:'la farmacia',de:'die Apotheke',info:'f',ex:'Cerco una farmacia aperta di notte.',cat:'body',diff:0},
+{it:'la febbre',de:'das Fieber',info:'f',ex:'Ho la febbre a trentotto.',cat:'body',diff:0},
+{it:'il dolore',de:'der Schmerz',info:'m',ex:'Sento un forte dolore al petto.',cat:'body',diff:0},
+{it:'mi fa male...',de:'...tut mir weh',info:'Redewendung',ex:'Mi fa male la schiena.',cat:'body',diff:0},
+// BODY L1
+{it:'il raffreddore',de:'der Schnupfen / Erkältung',info:'m',ex:'Ho preso il raffreddore.',cat:'body',diff:1},
+{it:'l\'influenza',de:'die Grippe',info:'f',ex:'Sono a letto con l\'influenza.',cat:'body',diff:1},
+{it:'la medicina',de:'das Medikament',info:'f',ex:'Prendo questa medicina tre volte al giorno.',cat:'body',diff:1},
+{it:'la ricetta medica',de:'das Rezept (Arzt)',info:'f',ex:'Il medico mi ha dato la ricetta.',cat:'body',diff:1},
+{it:'l\'ambulanza',de:'der Krankenwagen',info:'f',ex:'Chiamate l\'ambulanza, subito!',cat:'body',diff:1},
+{it:'ferito',de:'verletzt',info:'Adj. f: ferita',ex:'Sei ferito? Chiamo l\'ambulanza!',cat:'body',diff:1},
+{it:'l\'allergia',de:'die Allergie',info:'f',ex:'Ho un\'allergia al polline.',cat:'body',diff:1},
+// BODY L2
+{it:'il reparto',de:'die Krankenhausabteilung',info:'m',ex:'Il reparto di cardiologia è al quarto piano.',cat:'body',diff:2},
+{it:'la pressione arteriosa',de:'der Blutdruck',info:'f',ex:'Ho la pressione arteriosa alta.',cat:'body',diff:2},
+{it:'la diagnosi',de:'die Diagnose',info:'f',ex:'Il medico ha fatto la diagnosi.',cat:'body',diff:2},
+// FAMILY L0
+{it:'la famiglia',de:'die Familie',info:'f',ex:'La mia famiglia è molto numerosa.',cat:'family',diff:0},
+{it:'il padre',de:'der Vater',info:'m',ex:'Mio padre lavora come ingegnere.',cat:'family',diff:0},
+{it:'la madre',de:'die Mutter',info:'f',ex:'Mia madre fa la cuoca.',cat:'family',diff:0},
+{it:'il fratello',de:'der Bruder',info:'m / f: la sorella',ex:'Mio fratello vive a Milano.',cat:'family',diff:0},
+{it:'la sorella',de:'die Schwester',info:'f',ex:'Mia sorella si è sposata l\'anno scorso.',cat:'family',diff:0},
+{it:'il nonno',de:'der Großvater',info:'m / f: la nonna',ex:'I miei nonni abitano in campagna.',cat:'family',diff:0},
+{it:'il bambino',de:'das Kind',info:'m / f: la bambina',ex:'Il bambino gioca nel parco.',cat:'family',diff:0},
+{it:'il marito',de:'der Ehemann',info:'m / f: la moglie',ex:'Mio marito è un medico.',cat:'family',diff:0},
+{it:'il compleanno',de:'der Geburtstag',info:'m',ex:'Buon compleanno! Quanti anni compi?',cat:'family',diff:0},
+// FAMILY L1
+{it:'il nipote',de:'der Neffe / Enkel',info:'m / f: la nipote',ex:'Il mio nipote ha iniziato la scuola.',cat:'family',diff:1},
+{it:'lo zio',de:'der Onkel',info:'m / f: la zia',ex:'Mio zio abita in Toscana.',cat:'family',diff:1},
+{it:'il cugino',de:'der Cousin',info:'m / f: la cugina',ex:'La mia cugina si chiama Giulia.',cat:'family',diff:1},
+{it:'il fidanzato',de:'der Freund / Verlobte',info:'m / f: la fidanzata',ex:'Il mio fidanzato è italiano.',cat:'family',diff:1},
+{it:'sposato',de:'verheiratet',info:'Adj. f: sposata',ex:'Sei sposato? Sì, da cinque anni.',cat:'family',diff:1},
+{it:'il matrimonio',de:'die Hochzeit / Ehe',info:'m',ex:'Il matrimonio è stato bellissimo!',cat:'family',diff:1},
+// FAMILY L2
+{it:'il genero',de:'der Schwiegersohn',info:'m / f: la nuora',ex:'Il mio genero lavora in banca.',cat:'family',diff:2},
+{it:'il suocero',de:'der Schwiegervater',info:'m / f: la suocera',ex:'I suoceri vengono a cena stasera.',cat:'family',diff:2},
+{it:'il divorzio',de:'die Scheidung',info:'m',ex:'Dopo il divorzio, ha ricominciato la vita.',cat:'family',diff:2},
+// CITY L0
+{it:'il negozio',de:'der Laden / das Geschäft',info:'m',ex:'Questo negozio chiude alle venti.',cat:'city',diff:0},
+{it:'il supermercato',de:'der Supermarkt',info:'m',ex:'Vado al supermercato ogni giovedì.',cat:'city',diff:0},
+{it:'la piazza',de:'der Platz',info:'f',ex:'Ci vediamo in piazza a mezzogiorno.',cat:'city',diff:0},
+{it:'la banca',de:'die Bank',info:'f',ex:'Devo andare in banca a fare un prelievo.',cat:'city',diff:0},
+{it:'il prezzo',de:'der Preis',info:'m',ex:'Il prezzo di questo vestito è troppo alto.',cat:'city',diff:0},
+{it:'comprare',de:'kaufen',info:'Verb reg. (-are)',ex:'Voglio comprare un regalo per mia madre.',cat:'city',diff:0},
+{it:'costare',de:'kosten',info:'Verb reg. (-are)',ex:'Questo vestito costa troppo.',cat:'city',diff:0},
+{it:'i contanti',de:'das Bargeld',info:'m Pl',ex:'Pago in contanti, non ho la carta.',cat:'city',diff:0},
+// CITY L1
+{it:'lo sconto',de:'der Rabatt',info:'m',ex:'C\'è uno sconto del venti per cento.',cat:'city',diff:1},
+{it:'la cassa',de:'die Kasse',info:'f',ex:'Pago alla cassa con la carta.',cat:'city',diff:1},
+{it:'la carta di credito',de:'die Kreditkarte',info:'f',ex:'Accettate la carta di credito?',cat:'city',diff:1},
+{it:'la taglia',de:'die Größe (Kleidung)',info:'f',ex:'Che taglia porti? La media.',cat:'city',diff:1},
+{it:'il mercato',de:'der Markt',info:'m',ex:'Il mercato del sabato è molto vivace.',cat:'city',diff:1},
+{it:'la farmacia',de:'die Apotheke',info:'f',ex:'La farmacia è aperta fino alle venti.',cat:'city',diff:1},
+{it:'il museo',de:'das Museum',info:'m',ex:'Il museo chiude il lunedì.',cat:'city',diff:1},
+// CITY L2
+{it:'il portafoglio',de:'das Portemonnaie',info:'m',ex:'Ho perso il portafoglio sul treno.',cat:'city',diff:2},
+{it:'la posta',de:'das Postamt',info:'f',ex:'Spedisco il pacco alla posta.',cat:'city',diff:2},
+{it:'il comune',de:'das Gemeindeamt / Rathaus',info:'m',ex:'Devo andare al comune per il documento.',cat:'city',diff:2},
+// TIME L0
+{it:'oggi',de:'heute',info:'Adverb',ex:'Oggi fa molto caldo.',cat:'time',diff:0},
+{it:'ieri',de:'gestern',info:'Adverb',ex:'Ieri sono andato al cinema.',cat:'time',diff:0},
+{it:'domani',de:'morgen',info:'Adverb',ex:'Domani ho un appuntamento importante.',cat:'time',diff:0},
+{it:'la settimana',de:'die Woche',info:'f',ex:'La prossima settimana parto per Roma.',cat:'time',diff:0},
+{it:'il mese',de:'der Monat',info:'m',ex:'Questo mese ho molto lavoro.',cat:'time',diff:0},
+{it:'l\'anno',de:'das Jahr',info:'m',ex:'Quest\'anno vado a vivere in Italia.',cat:'time',diff:0},
+{it:'lunedì',de:'Montag',info:'m (invariabile)',ex:'Lunedì ho la riunione con il capo.',cat:'time',diff:0},
+{it:'venerdì',de:'Freitag',info:'m',ex:'Il venerdì sera vado spesso al cinema.',cat:'time',diff:0},
+{it:'domenica',de:'Sonntag',info:'f',ex:'La domenica sto con la famiglia.',cat:'time',diff:0},
+{it:'che ora è?',de:'Wie spät ist es?',info:'Frage',ex:'Che ora è? Sono le quindici.',cat:'time',diff:0},
+// TIME L1
+{it:'martedì',de:'Dienstag',info:'m',ex:'Martedì vado dal medico.',cat:'time',diff:1},
+{it:'mercoledì',de:'Mittwoch',info:'m',ex:'Mercoledì sera usciamo con gli amici.',cat:'time',diff:1},
+{it:'giovedì',de:'Donnerstag',info:'m',ex:'Giovedì mattina ho la palestra.',cat:'time',diff:1},
+{it:'sabato',de:'Samstag',info:'m',ex:'Il sabato vado al mercato.',cat:'time',diff:1},
+{it:'la mattina',de:'der Morgen / Vormittag',info:'f',ex:'La mattina bevo sempre un caffè.',cat:'time',diff:1},
+{it:'il pomeriggio',de:'der Nachmittag',info:'m',ex:'Nel pomeriggio faccio sport.',cat:'time',diff:1},
+{it:'la sera',de:'der Abend',info:'f',ex:'La sera mi piace leggere un libro.',cat:'time',diff:1},
+{it:'presto / tardi',de:'früh / spät',info:'Adverb',ex:'Mi sveglio sempre presto la mattina.',cat:'time',diff:1},
+{it:'mezzogiorno',de:'Mittag (12 Uhr)',info:'m',ex:'Ci vediamo a mezzogiorno in piazza.',cat:'time',diff:1},
+// TIME L2
+{it:'gennaio',de:'Januar',info:'m',ex:'Gennaio è il mese più freddo.',cat:'time',diff:2},
+{it:'agosto',de:'August',info:'m',ex:'Ad agosto molti negozi sono chiusi.',cat:'time',diff:2},
+{it:'dicembre',de:'Dezember',info:'m',ex:'A dicembre c\'è il Natale.',cat:'time',diff:2},
+{it:'il trimestre',de:'das Quartal / Trimester',info:'m',ex:'I risultati del trimestre sono ottimi.',cat:'time',diff:2},
+{it:'il decennio',de:'das Jahrzehnt',info:'m',ex:'Negli ultimi due decenni è cambiato tutto.',cat:'time',diff:2},
+// VERBS L0
+{it:'essere',de:'sein',info:'io sono, tu sei, lui è, noi siamo',ex:'Sono italiano e abito a Roma.',cat:'verbs',diff:0},
+{it:'avere',de:'haben',info:'io ho, tu hai, lui ha, noi abbiamo',ex:'Ho una macchina nuova.',cat:'verbs',diff:0},
+{it:'fare',de:'machen / tun',info:'io faccio, tu fai, lui fa',ex:'Cosa fai nel tempo libero?',cat:'verbs',diff:0},
+{it:'andare',de:'gehen / fahren',info:'io vado, tu vai, lui va',ex:'Vado al lavoro in bicicletta.',cat:'verbs',diff:0},
+{it:'venire',de:'kommen',info:'io vengo, tu vieni, lui viene',ex:'Vengo anche io alla festa!',cat:'verbs',diff:0},
+{it:'mangiare',de:'essen',info:'io mangio, tu mangi, lui mangia',ex:'Mangio sempre a casa a pranzo.',cat:'verbs',diff:0},
+{it:'bere',de:'trinken',info:'io bevo, tu bevi, lui beve (irreg.)',ex:'Bevo due litri d\'acqua al giorno.',cat:'verbs',diff:0},
+{it:'dormire',de:'schlafen',info:'io dormo, tu dormi, lui dorme',ex:'Dormo almeno otto ore per notte.',cat:'verbs',diff:0},
+{it:'parlare',de:'sprechen',info:'io parlo, tu parli, lui parla',ex:'Parlo italiano e tedesco.',cat:'verbs',diff:0},
+// VERBS L1
+{it:'potere',de:'können / dürfen',info:'io posso, tu puoi, lui può',ex:'Posso aiutarti con il progetto.',cat:'verbs',diff:1},
+{it:'volere',de:'wollen',info:'io voglio, tu vuoi, lui vuole',ex:'Voglio imparare l\'italiano.',cat:'verbs',diff:1},
+{it:'dovere',de:'müssen / sollen',info:'io devo, tu devi, lui deve',ex:'Devo finire il lavoro entro stasera.',cat:'verbs',diff:1},
+{it:'sapere',de:'wissen / können',info:'io so, tu sai, lui sa',ex:'So parlare tre lingue.',cat:'verbs',diff:1},
+{it:'capire',de:'verstehen / begreifen',info:'io capisco, tu capisci, lui capisce',ex:'Non capisco questa parola.',cat:'verbs',diff:1},
+{it:'prendere',de:'nehmen',info:'io prendo, tu prendi (p.p.: preso)',ex:'Prendo il treno delle otto.',cat:'verbs',diff:1},
+{it:'trovare',de:'finden',info:'io trovo, tu trovi',ex:'Ho trovato un ristorante ottimo.',cat:'verbs',diff:1},
+{it:'cercare',de:'suchen',info:'io cerco, tu cerchi',ex:'Cerco un appartamento in centro.',cat:'verbs',diff:1},
+{it:'imparare',de:'lernen',info:'io imparo, tu impari',ex:'Imparo l\'italiano da sei mesi.',cat:'verbs',diff:1},
+{it:'aspettare',de:'warten',info:'io aspetto, tu aspetti',ex:'Aspetta qui, arrivo tra cinque minuti.',cat:'verbs',diff:1},
+// VERBS L2
+{it:'svegliarsi',de:'aufwachen',info:'io mi sveglio, tu ti svegli (rifl.)',ex:'Mi sveglio alle sette ogni mattina.',cat:'verbs',diff:2},
+{it:'rendersi conto',de:'sich bewusst werden / merken',info:'Redewendung (rifl.)',ex:'Mi sono reso conto dell\'errore.',cat:'verbs',diff:2},
+{it:'farcela',de:'es schaffen',info:'farcela = riuscire (irreg.)',ex:'Ce la faccio da solo, grazie.',cat:'verbs',diff:2},
+{it:'trattarsi di',de:'sich handeln um',info:'Verb irreg.',ex:'Si tratta di un problema importante.',cat:'verbs',diff:2},
+{it:'accorgersi',de:'bemerken',info:'io mi accorgo, tu ti accorgi',ex:'Mi sono accorto dell\'errore troppo tardi.',cat:'verbs',diff:2},
+// ADJECTIVES L0
+{it:'bello / bella',de:'schön',info:'m/f (bel+cons.)',ex:'Che bella città è Firenze!',cat:'adj',diff:0},
+{it:'grande',de:'groß / bedeutend',info:'m/f (invariabile)',ex:'Roma è una grande città.',cat:'adj',diff:0},
+{it:'piccolo / piccola',de:'klein',info:'m/f',ex:'Ho un piccolo appartamento in centro.',cat:'adj',diff:0},
+{it:'buono / buona',de:'gut / lecker',info:'m/f (buon+cons.)',ex:'Questo vino è davvero buono.',cat:'adj',diff:0},
+{it:'caro / cara',de:'teuer / lieb',info:'m/f',ex:'Questo ristorante è troppo caro.',cat:'adj',diff:0},
+{it:'facile / difficile',de:'einfach / schwierig',info:'m/f (inv.)',ex:'L\'italiano non è così difficile.',cat:'adj',diff:0},
+{it:'caldo / freddo',de:'warm / kalt',info:'m/f',ex:'L\'estate in Sicilia è molto calda.',cat:'adj',diff:0},
+{it:'stanco / stanca',de:'müde',info:'m/f',ex:'Sono molto stanco dopo la lunga giornata.',cat:'adj',diff:0},
+{it:'felice',de:'glücklich / froh',info:'m/f (inv.)',ex:'Sono felice di essere qui con voi.',cat:'adj',diff:0},
+// ADJECTIVES L1
+{it:'simpatico / simpatica',de:'sympathisch / nett',info:'m/f',ex:'I miei colleghi sono molto simpatici.',cat:'adj',diff:1},
+{it:'gentile',de:'freundlich / höflich',info:'m/f (inv.)',ex:'Sei molto gentile, grazie!',cat:'adj',diff:1},
+{it:'occupato / libero',de:'beschäftigt / frei',info:'m/f',ex:'Sei libero sabato sera?',cat:'adj',diff:1},
+{it:'veloce / lento',de:'schnell / langsam',info:'m/f',ex:'Il treno ad alta velocità è molto veloce.',cat:'adj',diff:1},
+{it:'pesante / leggero',de:'schwer / leicht',info:'m/f',ex:'La valigia è troppo pesante.',cat:'adj',diff:1},
+{it:'importante',de:'wichtig',info:'m/f (inv.)',ex:'È molto importante arrivare puntuale.',cat:'adj',diff:1},
+{it:'interessante',de:'interessant',info:'m/f (inv.)',ex:'Il museo è molto interessante.',cat:'adj',diff:1},
+// ADJECTIVES L2
+{it:'delicato / delicata',de:'zart / heikel',info:'m/f',ex:'È una situazione molto delicata.',cat:'adj',diff:2},
+{it:'scoraggiante',de:'entmutigend',info:'m/f (inv.)',ex:'È scoraggiante non capire niente.',cat:'adj',diff:2},
+{it:'inaspettato',de:'unerwartet',info:'Adj. f: inaspettata',ex:'È stata una sorpresa inaspettata.',cat:'adj',diff:2},
+{it:'impegnativo',de:'anspruchsvoll / fordernd',info:'Adj. f: impegnativa',ex:'Questo lavoro è molto impegnativo.',cat:'adj',diff:2},
+];
+
+// ══════════════════════════════════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════════════════════════════════
+const SK='italiano_v4';
+let S={words:[], xp:0, streak:0, lastStudy:null,
+       unlockedLevels:{}, // {topicId: maxDiffUnlocked (0,1,2)}
+       sessionCat:null, sessionDiff:0};
+
+function sm2(w,q){
+  if(!w.ef)w.ef=2.5; if(!w.interval)w.interval=1; if(!w.reps)w.reps=0; if(!w.fails)w.fails=0;
+  if(q<1){w.reps=0;w.interval=1;w.fails++;}
+  else{
+    if(w.reps===0)w.interval=1;
+    else if(w.reps===1)w.interval=3;
+    else w.interval=Math.round(w.interval*w.ef);
+    w.reps++;
+  }
+  w.ef=Math.max(1.3,w.ef+0.1-(3-q)*(0.08+(3-q)*0.02));
+  w.nextReview=Date.now()+w.interval*86400000;
+  w.level=Math.min(5,Math.floor(w.reps/2));
+}
+const isDue=w=>!w.nextReview||Date.now()>=w.nextReview;
+const isWeak=w=>(w.level||0)<=1||(w.fails||0)>=2;
+const isForgotten=w=>w.nextReview&&Date.now()>w.nextReview+2*86400000&&w.reps>0;
+
+// Mastery % for a topic+diff (words with level>=3 / total in that topic+diff)
+function masteryPct(cat,diff){
+  const words=S.words.filter(w=>w.cat===cat&&w.diff===diff);
+  if(!words.length)return 0;
+  return Math.round(words.filter(w=>(w.level||0)>=3).length/words.length*100);
+}
+function unlockedDiff(cat){
+  return S.unlockedLevels[cat]??0; // default: only level 0 unlocked
+}
+function checkAndUnlock(cat){
+  const cur=unlockedDiff(cat);
+  if(cur>=2)return false;
+  const pct=masteryPct(cat,cur);
+  if(pct>=75){
+    S.unlockedLevels[cat]=cur+1;
+    save();
+    return true;
+  }
+  return false;
+}
+
+function save(){try{localStorage.setItem(SK,JSON.stringify(S));}catch(e){}}
+function load(){
+  try{const d=localStorage.getItem(SK);if(d)S=JSON.parse(d);}catch(e){}
+  if(!S.unlockedLevels)S.unlockedLevels={};
+  BUILTIN.forEach(b=>{
+    if(!S.words.find(w=>w.it===b.it&&w.cat===b.cat)){
+      S.words.push({...b,ef:2.5,interval:1,reps:0,level:0,nextReview:null,fails:0});
+    }
+  });
+  const today=new Date().toDateString();
+  if(S.lastStudy===today)return;
+  const yest=new Date(Date.now()-86400000).toDateString();
+  if(S.lastStudy===yest)S.streak++;
+  else if(S.lastStudy&&S.lastStudy!==today)S.streak=0;
+  save();
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// VIEWS
+// ══════════════════════════════════════════════════════════════════════════
+function showView(v){
+  document.querySelectorAll('[id^=view-]').forEach(el=>el.classList.add('hidden'));
+  document.getElementById('view-'+v).classList.remove('hidden');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active',b.getAttribute('onclick').includes("'"+v+"'")));
+  const m={topics:renderTopics,learn:resetSession,weak:renderWeak,
+    review:renderReview,game:startGame,audio:initAudio,words:renderWordList,stats:renderStats};
+  m[v]&&m[v]();
+  updateHeader(v);
+}
+const HEADER_IMGS={
+  topics:'https://images.unsplash.com/photo-1499678329028-101435549a4e?w=800&q=80',
+  learn:'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&q=80',
+  weak:'https://images.unsplash.com/photo-1516483638261-f4dbaf036963?w=800&q=80',
+  review:'https://images.unsplash.com/photo-1547651196-f3dde3b8f05c?w=800&q=80',
+  game:'https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=800&q=80',
+  audio:'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=800&q=80',
+  words:'https://images.unsplash.com/photo-1512295767273-ac109ac3acfa?w=800&q=80',
+  stats:'https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?w=800&q=80',
+};
+function updateHeader(v){document.getElementById('headerImg').src=HEADER_IMGS[v]||HEADER_IMGS.topics;}
+
+// ══════════════════════════════════════════════════════════════════════════
+// TOPICS VIEW
+// ══════════════════════════════════════════════════════════════════════════
+let modalTopic=null, modalDiff=0;
+const LEVEL_NAMES=['Basis','Erweitert','Fortgeschritten'];
+const LEVEL_ICONS=['🌱','🌿','🏆'];
+
+function renderTopics(){
+  document.getElementById('topicGrid').innerHTML=TOPICS.map(t=>{
+    const all=S.words.filter(w=>w.cat===t.id);
+    const unlocked=unlockedDiff(t.id);
+    const activeWords=S.words.filter(w=>w.cat===t.id&&w.diff<=unlocked);
+    const learned=activeWords.filter(w=>(w.level||0)>=3).length;
+    const pct=activeWords.length?Math.round(learned/activeWords.length*100):0;
+    const mastered=pct>=75&&activeWords.length>0&&unlocked>=2;
+    return `<div class="topic-card${mastered?' mastered':''}" style="background:var(--card)" onclick="openTopicModal('${t.id}')">
+      ${mastered?'<div class="mastered-badge">✅ Gemeistert</div>':''}
+      <img class="topic-img" src="${t.img}" alt="${t.name}" onerror="this.style.display='none'">
+      <div class="topic-img-overlay"></div>
+      <div class="topic-body" style="background:${t.color}22">
+        <div class="topic-icon">${t.icon}</div>
+        <div class="topic-name">${t.name}</div>
+        <div class="topic-meta">${activeWords.length} Wörter · ${LEVEL_ICONS[unlocked]} Lv${unlocked+1}</div>
+        <div class="topic-bar"><div style="width:${pct}%;background:${t.color}"></div></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openTopicModal(id){
+  modalTopic=id; modalDiff=unlockedDiff(id);
+  const t=TOPICS.find(x=>x.id===id);
+  document.getElementById('modalHeroImg').src=t.img;
+  document.getElementById('modalIcon').textContent=t.icon;
+  document.getElementById('modalTitle').textContent=t.name;
+  document.getElementById('modalHeroImg').onerror=function(){this.style.display='none'};
+  renderModalLevelTabs();
+  renderModalWords();
+  updateModalStats();
+  document.getElementById('topicModal').classList.remove('hidden');
+}
+function renderModalLevelTabs(){
+  const unlocked=unlockedDiff(modalTopic);
+  document.getElementById('modalLevelTabs').innerHTML=[0,1,2].map(d=>{
+    const isLocked=d>unlocked;
+    const pct=masteryPct(modalTopic,d);
+    const isCur=d===modalDiff;
+    return `<div class="lv-tab${isCur?' active':''}${isLocked?' locked':''}"
+      onclick="${isLocked?'showLockMsg('+d+')':'setModalDiff('+d+')'}"
+      title="${isLocked?'🔒 '+pct+'% / 75% für Freischaltung':LEVEL_NAMES[d]+' ('+pct+'% gemeistert)'}">
+      ${isLocked?'🔒 ':''}${LEVEL_ICONS[d]} ${LEVEL_NAMES[d]}
+      <span style="font-size:.65rem;opacity:.7;display:block;margin-top:1px">${pct}% ✓${isLocked?' – gesperrt':''}</span>
+    </div>`;
+  }).join('');
+}
+function showLockMsg(d){
+  const prevPct=masteryPct(modalTopic,d-1);
+  alert(`🔒 Level ${d+1} noch gesperrt!\n\nErreiche 75% Meisterschaft in "${LEVEL_NAMES[d-1]}" (aktuell: ${prevPct}%), um dieses Level freizuschalten.`);
+}
+function setModalDiff(d){
+  modalDiff=d;
+  renderModalLevelTabs();
+  renderModalWords();
+  updateModalStats();
+}
+function updateModalStats(){
+  const words=S.words.filter(w=>w.cat===modalTopic&&w.diff===modalDiff);
+  const due=words.filter(isDue).length;
+  const learned=words.filter(w=>(w.level||0)>=3).length;
+  const pct=masteryPct(modalTopic,modalDiff);
+  const unlocked=unlockedDiff(modalTopic);
+  const nextUnlockInfo=modalDiff<2&&modalDiff===unlocked?` · ${75-pct}% bis Level ${modalDiff+2}`:'';
+  document.getElementById('modalStats').textContent=`${words.length} Wörter · ${due} fällig · ${pct}% gemeistert${nextUnlockInfo}`;
+}
+function renderModalWords(){
+  const lvColors=['#555','#c0392b','#e67e22','#2471a3','#27ae60','#7d3c98'];
+  const words=S.words.filter(w=>w.cat===modalTopic&&w.diff===modalDiff);
+  document.getElementById('modalWordList').innerHTML=words.map(w=>
+    `<div class="wrow">
+      <div class="lvl-dot" style="background:${lvColors[w.level||0]}" title="Level ${w.level||0}"></div>
+      <div class="it">${w.it}</div>
+      <div class="de">${w.de}</div>
+      <div class="info">${w.info||''}</div>
+      <button style="background:none;border:none;color:var(--sub);cursor:pointer" onclick="speak('${w.it.replace(/'/g,"\\'")}')" >🔊</button>
+    </div>`).join('') || '<div style="color:var(--sub);font-size:.83rem;padding:8px 0">Keine Wörter in diesem Level.</div>';
+}
+function closeModal(){document.getElementById('topicModal').classList.add('hidden');}
+function startTopicSession(){
+  closeModal();
+  S.sessionCat=modalTopic; S.sessionDiff=modalDiff;
+  showView('learn');
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// LEARN VIEW
+// ══════════════════════════════════════════════════════════════════════════
+let curWord=null,flipped=false,sessionPool=[],sessionIdx=0;
+
+function resetSession(){
+  const cat=S.sessionCat;
+  const diff=S.sessionDiff??0;
+  const t=cat?TOPICS.find(x=>x.id===cat):null;
+  document.getElementById('sessionTopicLabel').textContent=
+    cat?(t?.icon+' '+t?.name+' · '+LEVEL_ICONS[diff]+' '+LEVEL_NAMES[diff]):'📚 Alle Themen';
+  let pool=cat?S.words.filter(w=>w.cat===cat&&w.diff===diff):S.words;
+  const due=pool.filter(isDue);
+  const notDue=pool.filter(w=>!isDue(w));
+  sessionPool=[...due.sort((a,b)=>(a.level||0)-(b.level||0)),
+               ...notDue.sort((a,b)=>(a.nextReview||0)-(b.nextReview||0))].slice(0,25);
+  sessionIdx=0;flipped=false;
+  updateSessInfo();showCardAt(0);
+}
+function updateSessInfo(){
+  const due=S.words.filter(isDue).length;
+  document.getElementById('sessionInfo').textContent=`Fällig: ${due} · Sitzung: ${sessionIdx}/${sessionPool.length}`;
+  document.getElementById('learnProg').style.width=(sessionPool.length?sessionIdx/sessionPool.length*100:0)+'%';
+}
+function showCardAt(i){
+  const w=sessionPool[i];curWord=w;
+  if(!w){
+    // Check unlock after session
+    if(S.sessionCat){
+      const unlocked=checkAndUnlock(S.sessionCat);
+      if(unlocked){
+        const newLv=unlockedDiff(S.sessionCat);
+        const t=TOPICS.find(x=>x.id===S.sessionCat);
+        document.getElementById('unlockMsg').textContent=
+          `${t?.name}: ${LEVEL_ICONS[newLv]} ${LEVEL_NAMES[newLv]} ist jetzt verfügbar!`;
+        document.getElementById('unlockBanner').classList.remove('hidden');
+        setTimeout(()=>document.getElementById('unlockBanner').classList.add('hidden'),5000);
+      }
+    }
+    document.getElementById('cardWord').textContent='🎉 Sitzung abgeschlossen!';
+    document.getElementById('cardInfo').textContent='';
+    document.getElementById('cardHint').textContent='';
+    document.getElementById('cardTrans').classList.remove('show');
+    document.getElementById('cardTransInfo').classList.remove('show');
+    document.getElementById('cardEx').classList.remove('show');
+    document.getElementById('ratingArea').classList.add('hidden');
+    document.getElementById('learnProg').style.width='100%';
+    renderTopics();return;
+  }
+  const dir=document.getElementById('dirSelect').value;
+  const showDE=dir==='de2it'||(dir==='both'&&Math.random()>.5);
+  w._showDE=showDE;
+  document.getElementById('cardHint').textContent=showDE?'🇩🇪 → 🇮🇹':'🇮🇹 → 🇩🇪';
+  document.getElementById('cardWord').textContent=showDE?w.de:w.it;
+  document.getElementById('cardInfo').textContent=showDE?'':(w.info||'');
+  document.getElementById('cardTrans').textContent=showDE?w.it:w.de;
+  document.getElementById('cardTransInfo').textContent=showDE?(w.info||''):'';
+  ['cardTrans','cardTransInfo','cardEx'].forEach(id=>document.getElementById(id).classList.remove('show'));
+  document.getElementById('cardEx').textContent=w.ex||'';
+  document.getElementById('ratingArea').classList.add('hidden');
+  flipped=false;updateSessInfo();
+}
+function flipCard(){
+  if(flipped)return;flipped=true;
+  ['cardTrans','cardTransInfo'].forEach(id=>document.getElementById(id).classList.add('show'));
+  if(curWord?.ex)document.getElementById('cardEx').classList.add('show');
+  document.getElementById('ratingArea').classList.remove('hidden');
+  if(curWord)speak(curWord.it);
+}
+function rate(q){
+  if(!curWord)return;
+  sm2(curWord,q);
+  addXP([0,5,10,20][q]);
+  S.lastStudy=new Date().toDateString();
+  sessionIdx++;save();showCardAt(sessionIdx);
+}
+function speakCurrent(){if(curWord)speak(curWord.it);}
+
+// ══════════════════════════════════════════════════════════════════════════
+// WEAK VIEW
+// ══════════════════════════════════════════════════════════════════════════
+function renderWeak(){
+  const weak=S.words.filter(isWeak);
+  const forgotten=S.words.filter(isForgotten);
+  document.getElementById('weakStats').innerHTML=`
+    <div class="stat-box"><div class="val" style="background:linear-gradient(135deg,#c0392b,#922b21);-webkit-background-clip:text">${weak.length}</div><div class="lbl">Schwache Wörter</div></div>
+    <div class="stat-box"><div class="val" style="background:linear-gradient(135deg,#e67e22,#935116);-webkit-background-clip:text">${forgotten.length}</div><div class="lbl">Fast vergessen</div></div>
+    <div class="stat-box"><div class="val">${S.words.filter(isDue).length}</div><div class="lbl">Heute fällig</div></div>`;
+  document.getElementById('weakByTopic').innerHTML=TOPICS.map(t=>{
+    const w=S.words.filter(x=>x.cat===t.id&&isWeak(x));
+    if(!w.length)return'';
+    return `<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:1.1rem">${t.icon}</span>
+      <span style="flex:1;font-size:.85rem">${t.name}</span>
+      <span style="color:#e74c3c;font-weight:700;font-size:.83rem">${w.length} schwach</span>
+      <button class="btn btn-red" style="padding:6px 10px;font-size:.75rem" onclick="startWeakByTopic('${t.id}')">Üben</button>
+    </div>`;
+  }).join('')||'<div style="color:var(--sub);font-size:.83rem;padding:8px 0">Keine schwachen Wörter – super! 🎉</div>';
+}
+function startWeakSession(){
+  const pool=S.words.filter(isWeak).sort((a,b)=>(a.level||0)-(b.level||0));
+  if(!pool.length){alert('Keine schwachen Wörter!');return;}
+  sessionPool=pool.slice(0,25);sessionIdx=0;S.sessionCat=null;
+  document.getElementById('sessionTopicLabel').textContent='⚡ Schwache Wörter (alle Themen)';
+  showView('learn');
+}
+function startWeakByTopic(cat){
+  const pool=S.words.filter(w=>w.cat===cat&&isWeak(w));
+  if(!pool.length){alert('Keine schwachen Wörter!');return;}
+  sessionPool=pool;sessionIdx=0;S.sessionCat=null;
+  const t=TOPICS.find(x=>x.id===cat);
+  document.getElementById('sessionTopicLabel').textContent='⚡ '+t?.name+' (schwach)';
+  showView('learn');
+}
+function startForgottenSession(){
+  const pool=S.words.filter(isForgotten);
+  if(!pool.length){alert('Keine fast-vergessenen Wörter!');return;}
+  sessionPool=pool;sessionIdx=0;S.sessionCat=null;
+  document.getElementById('sessionTopicLabel').textContent='⏰ Fast vergessen';
+  showView('learn');
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// REVIEW VIEW
+// ══════════════════════════════════════════════════════════════════════════
+function renderReview(){
+  const review=S.words.filter(w=>w.reps>0&&isDue(w)&&(w.level||0)>=3);
+  const upcoming=S.words.filter(w=>w.nextReview&&!isDue(w)).sort((a,b)=>a.nextReview-b.nextReview).slice(0,10);
+  document.getElementById('reviewStats').innerHTML=`
+    <div class="stat-box"><div class="val" style="background:linear-gradient(135deg,#7d3c98,#512e7d);-webkit-background-clip:text">${review.length}</div><div class="lbl">Fällige Reviews</div></div>
+    <div class="stat-box"><div class="val">${S.words.filter(w=>(w.level||0)>=4).length}</div><div class="lbl">Gemeistert (Lv4+)</div></div>
+    <div class="stat-box"><div class="val">${upcoming.length}</div><div class="lbl">Bald fällig</div></div>`;
+  const fmt=ms=>{const d=Math.ceil((ms-Date.now())/86400000);return d<=0?'Heute':d===1?'Morgen':`In ${d} Tagen`;};
+  document.getElementById('upcomingReviews').innerHTML=upcoming.map(w=>
+    `<div class="wrow"><div class="it">${w.it}</div><div class="de">${w.de}</div>
+    <div style="font-size:.72rem;color:var(--orange)">${fmt(w.nextReview)}</div></div>`
+  ).join('')||'<div style="color:var(--sub);font-size:.83rem">Keine bevorstehenden Reviews.</div>';
+}
+function startReviewSession(){
+  const pool=S.words.filter(w=>w.reps>0&&(w.level||0)>=2).sort((a,b)=>(a.nextReview||0)-(b.nextReview||0));
+  if(!pool.length){alert('Keine Wörter zum Wiederholen!');return;}
+  sessionPool=pool.slice(0,20);sessionIdx=0;S.sessionCat=null;
+  document.getElementById('sessionTopicLabel').textContent='🔄 Wiederholung (Spaced Repetition)';
+  showView('learn');
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// GAME VIEW
+// ══════════════════════════════════════════════════════════════════════════
+let gameScore=0,gameAnswered=false,gamePool=[];
+function startGame(){gamePool=S.words;gameScore=0;document.getElementById('gameScore').textContent='Score: 0';nextRound();}
+function startWeakGame(){gamePool=S.words.filter(isWeak);if(gamePool.length<4)gamePool=S.words;gameScore=0;document.getElementById('gameScore').textContent='Score: 0';nextRound();}
+function nextRound(){
+  gameAnswered=false;
+  if(gamePool.length<4){document.getElementById('gameFeedback').textContent='Zu wenig Wörter!';return;}
+  const idx=Math.floor(Math.random()*gamePool.length);
+  const correct=gamePool[idx];
+  const wrong=gamePool.filter((_,i)=>i!==idx).sort(()=>Math.random()-.5).slice(0,3);
+  const opts=[...wrong,correct].sort(()=>Math.random()-.5);
+  const isIT=Math.random()>.5;
+  document.getElementById('gameWord').textContent=isIT?correct.it:correct.de;
+  document.getElementById('gameWordInfo').textContent=isIT?(correct.info||''):'';
+  document.getElementById('gamePrompt').textContent=(isIT?'WIE AUF DEUTSCH?':'COME SI DICE IN ITALIANO?');
+  document.getElementById('gameFeedback').textContent='';
+  const c=document.getElementById('gameOpts');c.innerHTML='';
+  opts.forEach(o=>{
+    const b=document.createElement('button');
+    b.textContent=isIT?o.de:o.it;
+    b.onclick=()=>{
+      if(gameAnswered)return;gameAnswered=true;
+      if(o===correct){
+        b.classList.add('correct');gameScore+=10;addXP(10);
+        document.getElementById('gameScore').textContent='Score: '+gameScore;
+        document.getElementById('gameFeedback').textContent='✅ '+correct.ex;
+        speak(correct.it);setTimeout(nextRound,2300);
+      }else{
+        b.classList.add('wrong');
+        c.querySelectorAll('button').forEach(btn=>{if(btn.textContent===(isIT?correct.de:correct.it))btn.classList.add('correct');});
+        document.getElementById('gameFeedback').textContent='❌ Richtig: '+(isIT?correct.de:correct.it);
+        sm2(correct,0);save();setTimeout(nextRound,2700);
+      }
+    };
+    c.appendChild(b);
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// AUDIO VIEW
+// ══════════════════════════════════════════════════════════════════════════
+let audioPool=[],audioIdx=0,autoTimer=null,recog=null,listening=false;
+function initAudio(){audioFilter();}
+function audioFilter(){
+  const f=document.getElementById('audioFilterSel')?.value||'all';
+  audioPool=f==='weak'?S.words.filter(isWeak):f==='due'?S.words.filter(isDue):S.words;
+  if(!audioPool.length)audioPool=S.words;
+  audioIdx=0;renderAudioCard();
+}
+function renderAudioCard(){
+  if(!audioPool.length)return;
+  const w=audioPool[audioIdx%audioPool.length];
+  document.getElementById('audioWord').textContent=w.it;
+  document.getElementById('audioInfo').textContent=w.info||'';
+  document.getElementById('audioTrans').textContent=w.de;
+  document.getElementById('audioEx').textContent=w.ex||'';
+  speak(w.it);
+}
+function audioNext(){audioIdx++;renderAudioCard();}
+function audioPrev(){audioIdx=Math.max(0,audioIdx-1);renderAudioCard();}
+function startAutoPlay(){
+  if(autoTimer)return;
+  const loop=()=>{
+    if(!audioPool.length)return;
+    const w=audioPool[audioIdx%audioPool.length];
+    renderAudioCard();speak(w.it);
+    setTimeout(()=>speak(w.de,'de-DE'),2300);
+    autoTimer=setTimeout(()=>{audioIdx++;loop();},6500);
+  };loop();
+}
+function stopAutoPlay(){clearTimeout(autoTimer);autoTimer=null;}
+function toggleListen(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){document.getElementById('micStatus').textContent='Spracheingabe nicht verfügbar.';return;}
+  if(listening){recog&&recog.stop();return;}
+  recog=new SR();recog.lang='de-DE';recog.continuous=false;recog.interimResults=false;
+  recog.onstart=()=>{listening=true;document.getElementById('micBtn').classList.add('listening');};
+  recog.onend=()=>{listening=false;document.getElementById('micBtn').classList.remove('listening');};
+  recog.onresult=e=>{
+    const t=e.results[0][0].transcript.toLowerCase().trim();
+    document.getElementById('micStatus').textContent='🎤 "'+t+'"';
+    if(t.includes('weiter')||t.includes('nächste'))audioNext();
+    else if(t.includes('zurück'))audioPrev();
+    else if(t.includes('wiederholen'))renderAudioCard();
+    else{
+      const w=audioPool[audioIdx%audioPool.length];
+      const match=w.de.toLowerCase().split(' ').some(word=>word.length>3&&t.includes(word));
+      if(match){document.getElementById('micStatus').textContent='✅ Richtig!';addXP(5);save();setTimeout(audioNext,1000);}
+      else document.getElementById('micStatus').textContent='❌ Richtig wäre: '+w.de;
+    }
+  };
+  recog.start();
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// ADD WORDS
+// ══════════════════════════════════════════════════════════════════════════
+function addWord(){
+  const it=document.getElementById('newIt').value.trim();
+  const de=document.getElementById('newDe').value.trim();
+  const info=document.getElementById('newInfo').value.trim();
+  const ex=document.getElementById('newEx').value.trim();
+  const cat=document.getElementById('newCat').value;
+  const diff=parseInt(document.getElementById('newLevel').value);
+  if(!it||!de){alert('Bitte Italiano und Deutsch ausfüllen!');return;}
+  S.words.push({it,de,info,ex,cat,diff,ef:2.5,interval:1,reps:0,level:0,nextReview:null,fails:0});
+  ['newIt','newDe','newInfo','newEx'].forEach(id=>document.getElementById(id).value='');
+  save();renderWordList();renderTopics();
+}
+function startVoiceAdd(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){document.getElementById('voiceAddStatus').textContent='Nicht verfügbar.';return;}
+  document.getElementById('voiceAddStatus').textContent='🎤 Sprich das italienische Wort...';
+  const r=new SR();r.lang='it-IT';r.continuous=false;
+  r.onresult=e=>{document.getElementById('newIt').value=e.results[0][0].transcript;document.getElementById('voiceAddStatus').textContent='✅ Erkannt!';};
+  r.onerror=()=>{document.getElementById('voiceAddStatus').textContent='Fehler bei Spracheingabe.';};
+  r.start();
+}
+function renderWordList(){
+  const q=(document.getElementById('searchWord')?.value||'').toLowerCase();
+  document.getElementById('wordCount').textContent=S.words.length;
+  const lvColors=['#555','#c0392b','#e67e22','#2471a3','#27ae60','#7d3c98'];
+  document.getElementById('wordList').innerHTML=S.words.map((w,i)=>{
+    if(q&&!w.it.toLowerCase().includes(q)&&!w.de.toLowerCase().includes(q))return'';
+    const t=TOPICS.find(x=>x.id===w.cat);
+    return `<div class="wrow">
+      <div class="lvl-dot" style="background:${lvColors[w.level||0]}" title="Lernlevel ${w.level||0}"></div>
+      <div class="it">${w.it}</div>
+      <div class="de">${w.de}</div>
+      <div class="info">${w.info||''}</div>
+      <span style="font-size:.65rem;color:var(--sub)">${t?.icon||''}</span>
+      <button style="background:none;border:none;color:var(--sub);cursor:pointer" onclick="speak('${w.it.replace(/'/g,"\\'")}')" >🔊</button>
+      <button style="background:none;border:none;color:var(--red);cursor:pointer" onclick="deleteWord(${i})">🗑</button>
+    </div>`;
+  }).join('');
+}
+function deleteWord(i){if(confirm('Löschen?')){S.words.splice(i,1);save();renderWordList();renderTopics();}}
+
+// ══════════════════════════════════════════════════════════════════════════
+// STATS
+// ══════════════════════════════════════════════════════════════════════════
+function renderStats(){
+  const lv=Math.floor(S.xp/100)+1;
+  document.getElementById('statGrid').innerHTML=`
+    <div class="stat-box"><div class="val">${S.words.length}</div><div class="lbl">Vokabeln total</div></div>
+    <div class="stat-box"><div class="val">${S.words.filter(isDue).length}</div><div class="lbl">Heute fällig</div></div>
+    <div class="stat-box"><div class="val">${S.streak}🔥</div><div class="lbl">Streak</div></div>
+    <div class="stat-box"><div class="val">${S.xp}</div><div class="lbl">XP gesamt</div></div>
+    <div class="stat-box"><div class="val">Lv${lv}</div><div class="lbl">Level</div></div>
+    <div class="stat-box"><div class="val">${S.words.filter(w=>(w.level||0)>=4).length}</div><div class="lbl">Gemeistert</div></div>`;
+  const lvColors=['#555','#c0392b','#e67e22','#2471a3','#27ae60','#7d3c98'];
+  const lvNames=['Neu','Schwach','Lernend','Gut','Sicher','Gemeistert'];
+  document.getElementById('levelBreakdown').innerHTML=[0,1,2,3,4,5].map(l=>{
+    const cnt=S.words.filter(w=>(w.level||0)===l).length;
+    const pct=S.words.length?Math.round(cnt/S.words.length*100):0;
+    return `<div style="display:flex;align-items:center;gap:8px;margin:5px 0">
+      <span style="width:78px;font-size:.75rem;color:var(--sub)">${lvNames[l]}</span>
+      <div style="flex:1;height:12px;background:var(--border);border-radius:6px;overflow:hidden">
+        <div style="width:${pct}%;height:100%;background:${lvColors[l]};border-radius:6px"></div>
+      </div>
+      <span style="width:28px;font-size:.75rem;text-align:right;color:var(--sub)">${cnt}</span>
+    </div>`;
+  }).join('');
+  document.getElementById('topicBreakdown').innerHTML=TOPICS.map(t=>{
+    const words=S.words.filter(w=>w.cat===t.id);
+    const learned=words.filter(w=>(w.level||0)>=3).length;
+    const pct=words.length?Math.round(learned/words.length*100):0;
+    const unlocked=unlockedDiff(t.id);
+    return `<div style="display:flex;align-items:center;gap:8px;margin:6px 0">
+      <span style="font-size:1rem">${t.icon}</span>
+      <span style="flex:1;font-size:.78rem">${t.name}</span>
+      <span style="font-size:.65rem;color:var(--sub)">${LEVEL_ICONS[unlocked]} Lv${unlocked+1}</span>
+      <div style="width:70px;height:8px;background:var(--border);border-radius:4px;overflow:hidden">
+        <div style="width:${pct}%;height:100%;background:${t.color};border-radius:4px"></div>
+      </div>
+      <span style="width:28px;font-size:.72rem;text-align:right;color:var(--sub)">${pct}%</span>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════════════════════════════════════
+function speak(text,lang='it-IT'){
+  if(!window.speechSynthesis)return;
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang=lang;u.rate=0.85;speechSynthesis.speak(u);
+}
+function addXP(n){
+  S.xp+=n;
+  const lv=Math.floor(S.xp/100)+1;
+  document.getElementById('xpDisplay').textContent=`⭐ ${S.xp} XP · Lv.${lv}`;
+}
+function exportData(){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(S,null,2)],{type:'application/json'}));
+  a.download='italiano_backup.json';a.click();
+}
+function importData(){
+  const inp=document.createElement('input');inp.type='file';inp.accept='.json';
+  inp.onchange=e=>{
+    const fr=new FileReader();
+    fr.onload=ev=>{try{const d=JSON.parse(ev.target.result);if(d.words){S=d;save();renderWordList();renderTopics();alert('Import: '+d.words.length+' Wörter');}}catch{alert('Fehler');}};
+    fr.readAsText(e.target.files[0]);
+  };inp.click();
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════════════════
+load();
+document.getElementById('streakBadge').textContent='🔥 '+S.streak+' Tage';
+addXP(0);
+showView('topics');
+</script>
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js')
+      .then(() => console.log('✅ Service Worker registriert'))
+      .catch(e => console.log('❌ SW Fehler:', e));
+  }
+</script>
+</body>
+</html>
